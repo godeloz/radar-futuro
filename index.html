@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>El presupuesto del futuro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F1F4F2;
+  --paper-deep:#E4EAE7;
+  --ink:#0D2220;
+  --ink-soft:#4A5C58;
+  --ink-faint:#8B9A96;
+  --teal:#12A99E;
+  --teal-light:#1ABCB0;
+  --amber:#D9922B;
+  --slate:#4A5C7A;
+  --line:rgba(13,34,32,.14);
+  --line-soft:rgba(13,34,32,.07);
+  --red:#C0563C;
+  --shadow:0 1px 2px rgba(13,34,32,.05), 0 8px 28px rgba(13,34,32,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'Inter Tight',system-ui,sans-serif;
+  font-size:16px;line-height:1.6;
+  min-height:100vh;
+  position:relative;
+  overflow-x:hidden;
+}
+/* campo topográfico de fondo — la firma visual */
+.contour-field{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5}
+.wrap{position:relative;z-index:1;max-width:700px;margin:0 auto;padding:0 24px 100px}
+
+h1,h2,h3,.display{font-family:'Fraunces',Georgia,serif;font-weight:400;line-height:1.12;letter-spacing:-.015em}
+h1{font-size:clamp(2.1rem,6.5vw,3.1rem)}
+h2{font-size:clamp(1.6rem,4.5vw,2.1rem)}
+h3{font-size:1.18rem;line-height:1.25}
+.mono{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.17em;text-transform:uppercase;color:var(--ink-faint)}
+p{color:var(--ink-soft)}
+.lead{font-size:1.06rem}
+
+/* pantallas */
+.screen{display:none;padding-top:56px;animation:rise .5s cubic-bezier(.2,.7,.3,1)}
+.screen.on{display:block}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* botones */
+button{font-family:inherit;font-size:.95rem;cursor:pointer;border:none;background:none;color:inherit}
+.btn{
+  display:inline-flex;align-items:center;gap:10px;
+  background:var(--ink);color:var(--paper);
+  padding:14px 26px;border-radius:999px;font-weight:500;letter-spacing:.005em;
+  transition:transform .18s,background .18s,box-shadow .18s;
+}
+.btn:hover{background:#153431;transform:translateY(-1px);box-shadow:var(--shadow)}
+.btn:disabled{opacity:.32;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-ghost{background:none;color:var(--ink-soft);border:1px solid var(--line);padding:13px 24px}
+.btn-ghost:hover{background:var(--paper-deep);color:var(--ink)}
+.btn-teal{background:var(--teal)}
+.btn-teal:hover{background:var(--teal-light)}
+:focus-visible{outline:2px solid var(--teal);outline-offset:3px;border-radius:4px}
+.actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:38px}
+
+/* bienvenida */
+.hero-mark{margin:0 0 34px}
+.welcome-body{margin-top:26px;display:flex;flex-direction:column;gap:16px;max-width:56ch}
+.welcome-body p:last-child{color:var(--ink);font-family:'Fraunces',Georgia,serif;font-size:1.16rem;line-height:1.45}
+
+/* presupuesto */
+.budget-badge{
+  display:flex;align-items:baseline;gap:14px;
+  border-top:1px solid var(--ink);border-bottom:1px solid var(--line);
+  padding:20px 0;margin:32px 0;
+}
+.budget-badge .num{font-family:'Fraunces',serif;font-size:3.4rem;line-height:.9;color:var(--teal)}
+.budget-badge .lbl{font-size:.9rem;color:var(--ink-soft);max-width:26ch}
+.tips{list-style:none;display:flex;flex-direction:column;gap:2px;margin:26px 0 0}
+.tips li{display:flex;gap:16px;padding:13px 0;border-bottom:1px solid var(--line-soft);font-size:.95rem;color:var(--ink-soft)}
+.tips li span{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--teal);padding-top:4px;flex:none}
+.note{background:var(--paper-deep);border-left:2px solid var(--amber);padding:16px 20px;font-size:.93rem;margin:30px 0 0;border-radius:0 6px 6px 0}
+.note strong{color:var(--ink);font-weight:600}
+.axis-preview{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1px;background:var(--line-soft);border:1px solid var(--line-soft);margin-top:14px;border-radius:8px;overflow:hidden}
+.axis-preview div{background:var(--paper);padding:12px 14px;font-size:.85rem;display:flex;align-items:center;gap:9px;color:var(--ink-soft)}
+.axis-preview svg{color:var(--teal);flex:none}
+
+/* barra superior de bonos */
+.topbar{
+  position:sticky;top:0;z-index:5;background:rgba(241,244,242,.93);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  margin:0 -24px;padding:14px 24px;border-bottom:1px solid var(--line-soft);
+  display:flex;justify-content:space-between;align-items:center;gap:16px;
+}
+.pips{display:flex;gap:4px;flex-wrap:wrap;max-width:60%}
+.pip{width:9px;height:9px;border-radius:50%;background:var(--teal);transition:background .2s,transform .2s}
+.pip.spent{background:var(--line);transform:scale(.7)}
+.counter{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--ink-soft);white-space:nowrap}
+.counter b{color:var(--ink);font-size:1.05rem;font-weight:500}
+
+/* pantalla de eje */
+.axis-head{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+.axis-icon{width:44px;height:44px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;color:var(--teal);flex:none;background:var(--paper)}
+.axis-desc{max-width:52ch;margin-top:10px;font-size:.97rem}
+.progress-rail{display:flex;gap:5px;margin-top:30px}
+.progress-rail i{height:2px;flex:1;background:var(--line);border-radius:2px}
+.progress-rail i.done{background:var(--teal)}
+.progress-rail i.now{background:var(--ink)}
+
+.invest{margin-top:34px}
+.invest-top{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:10px}
+.invest-top .eyebrow{margin-bottom:2px}
+.big-val{font-family:'Fraunces',serif;font-size:2.6rem;line-height:1;color:var(--ink)}
+.big-val.zero{color:var(--ink-faint)}
+.slider-holder{position:relative;padding:10px 0 4px}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:26px;background:transparent;cursor:pointer;display:block}
+.lock-zone{
+  position:absolute;top:22px;height:2px;pointer-events:none;border-radius:2px;
+  background:repeating-linear-gradient(90deg,var(--ink-faint) 0 3px,transparent 3px 7px);
+  opacity:.55;transition:left .18s,width .18s;
+}
+.lock-zone.hidden{display:none}
+input[type=range]::-webkit-slider-runnable-track{height:2px;background:var(--line);border-radius:2px}
+input[type=range]::-moz-range-track{height:2px;background:var(--line);border-radius:2px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:var(--teal);border:4px solid var(--paper);box-shadow:0 2px 8px rgba(18,169,158,.4);margin-top:-12px;transition:transform .15s}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--teal);border:4px solid var(--paper);box-shadow:0 2px 8px rgba(18,169,158,.4)}
+input[type=range]:active::-webkit-slider-thumb{transform:scale(1.12)}
+.ticks{position:relative;height:20px;margin-top:11px}
+.ticks span{position:absolute;top:0;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--ink-faint);transition:color .18s}
+.ticks span.hot{color:var(--teal);font-weight:500}
+.ticks span.locked{opacity:.32}
+.qual{
+  margin-top:26px;min-height:118px;display:flex;align-items:flex-start;
+  border-top:1px solid var(--line);padding-top:20px;
+}
+.qual p{font-family:'Fraunces',Georgia,serif;font-size:1.13rem;line-height:1.48;color:var(--ink);transition:opacity .2s}
+.qual p.faded{opacity:0}
+.qual.empty p{font-family:'Inter Tight',sans-serif;font-size:.98rem;color:var(--ink-faint);font-style:italic}
+.warn{font-size:.86rem;color:var(--amber);margin-top:14px;min-height:20px}
+
+/* flags */
+.flag-grid{display:flex;flex-direction:column;gap:26px;margin-top:34px}
+.flag-box{border:1px solid var(--line);border-radius:12px;padding:22px 24px;background:var(--paper)}
+.flag-box.green{border-color:rgba(18,169,158,.4)}
+.flag-box.red{border-color:rgba(192,86,60,.35)}
+.flag-box h3{display:flex;align-items:center;gap:10px;margin-bottom:14px;font-size:1.02rem;font-family:'Inter Tight',sans-serif;font-weight:600;letter-spacing:0}
+.dot{width:8px;height:8px;border-radius:50%;flex:none}
+.dot.g{background:var(--teal)}.dot.r{background:var(--red)}
+.flag-box ul{list-style:none;display:flex;flex-direction:column;gap:9px}
+.flag-box li{font-size:.93rem;color:var(--ink-soft);padding-left:16px;position:relative}
+.flag-box li::before{content:'';position:absolute;left:0;top:9px;width:6px;height:1px;background:var(--ink-faint)}
+.verdict{border-top:1px solid var(--ink);padding-top:24px;margin-top:34px}
+.verdict h2{margin-bottom:12px}
+
+/* bonus */
+.bonus-list{display:flex;flex-direction:column;gap:1px;background:var(--line-soft);border-radius:10px;overflow:hidden;margin-top:24px}
+.bonus-row{background:var(--paper);padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.bonus-row .nm{font-weight:500;font-size:.96rem}
+.bonus-row .sub{font-size:.8rem;color:var(--ink-faint)}
+.stepper{display:flex;align-items:center;gap:12px}
+.stepper button{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-size:1.1rem;color:var(--ink-soft);line-height:1}
+.stepper button:hover:not(:disabled){background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.stepper button:disabled{opacity:.28;cursor:not-allowed}
+.stepper .v{font-family:'JetBrains Mono',monospace;font-size:1rem;min-width:18px;text-align:center}
+
+/* diagnóstico */
+.diag-section{margin-top:64px;padding-top:34px;border-top:1px solid var(--line)}
+.diag-section:first-of-type{border-top:none;padding-top:0}
+.radar-card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:10px 6px 4px;margin:26px 0 30px;box-shadow:var(--shadow)}
+.radar-card svg{width:100%;height:auto;display:block}
+.arche{border-left:2px solid var(--teal);padding-left:22px;margin-top:8px}
+.arche .eyebrow{margin-bottom:6px}
+.arche h2{margin-bottom:12px}
+.arche .cost{margin-top:14px;font-size:.93rem;color:var(--ink-soft);border-top:1px dashed var(--line);padding-top:12px}
+.arche .cost b{color:var(--amber);font-weight:600}
+
+.portrait{background:var(--paper-deep);border-radius:14px;padding:26px 28px;margin-top:22px}
+.portrait p{font-family:'Fraunces',Georgia,serif;font-size:1.05rem;line-height:1.62;color:var(--ink)}
+
+.axis-card{border-top:1px solid var(--line);padding:26px 0}
+.axis-card:last-child{border-bottom:1px solid var(--line)}
+.axis-card-head{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+.axis-card-head .axis-icon{width:38px;height:38px}
+.axis-card-head h3{flex:1;font-family:'Inter Tight',sans-serif;font-weight:600;font-size:1.05rem;letter-spacing:0}
+.score{font-family:'JetBrains Mono',monospace;font-size:.9rem;color:var(--ink-faint)}
+.score b{color:var(--teal);font-size:1.3rem;font-weight:500}
+.axis-card .qtext{font-family:'Fraunces',Georgia,serif;font-size:1.02rem;line-height:1.5;color:var(--ink);margin-bottom:16px}
+.axis-card .band{font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:9px;display:block}
+.axis-card ol{list-style:none;counter-reset:p;display:flex;flex-direction:column;gap:8px}
+.axis-card ol li{counter-increment:p;font-size:.92rem;color:var(--ink-soft);padding-left:26px;position:relative}
+.axis-card ol li::before{content:counter(p);position:absolute;left:0;top:0;font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--ink-faint);border:1px solid var(--line);width:17px;height:17px;border-radius:50%;display:grid;place-items:center;margin-top:3px}
+
+.scen{border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin-top:14px;background:var(--paper)}
+.scen h3{font-family:'Fraunces',serif;font-size:1.14rem;margin-bottom:8px}
+.scen p{font-size:.94rem}
+.scen .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:13px}
+.scen .tags i{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:var(--teal);border:1px solid rgba(18,169,158,.35);padding:3px 9px;border-radius:999px}
+.fracture{border:1px solid rgba(192,86,60,.35);background:rgba(192,86,60,.04);border-radius:12px;padding:22px 24px;margin-top:16px}
+.fracture .eyebrow{color:var(--red);margin-bottom:10px}
+.fracture .fr-title{font-family:'Fraunces',serif;font-size:1.24rem;margin-bottom:10px;letter-spacing:-.01em}
+.fracture .fr-body{font-family:'Inter Tight',sans-serif;font-size:.95rem;color:var(--ink-soft);margin-bottom:16px}
+.fracture p:last-child{font-family:'Fraunces',Georgia,serif;font-size:1.08rem;color:var(--ink);line-height:1.45;border-top:1px dashed rgba(192,86,60,.3);padding-top:14px}
+
+/* info */
+.info-btn{position:fixed;right:20px;bottom:20px;z-index:20;width:42px;height:42px;border-radius:50%;background:var(--paper);border:1px solid var(--line);display:grid;place-items:center;color:var(--ink-soft);box-shadow:var(--shadow)}
+.info-btn:hover{color:var(--teal);border-color:var(--teal)}
+.modal{position:fixed;inset:0;z-index:30;background:rgba(13,34,32,.4);display:none;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(3px)}
+.modal.on{display:flex}
+.modal-inner{background:var(--paper);border-radius:16px;max-width:520px;width:100%;padding:32px;max-height:86vh;overflow:auto;box-shadow:0 20px 60px rgba(13,34,32,.25)}
+.modal-inner h3{margin-bottom:14px}
+.books{list-style:none;display:flex;flex-direction:column;gap:14px;margin:18px 0}
+.books li{font-size:.92rem;color:var(--ink-soft);border-left:2px solid var(--teal);padding-left:14px}
+.books b{color:var(--ink);font-weight:600;display:block;font-family:'Fraunces',serif;font-size:1rem}
+.close-x{float:right;font-size:1.4rem;line-height:1;color:var(--ink-faint);margin:-8px -8px 0 0}
+
+@media(max-width:560px){
+  .wrap{padding:0 18px 90px}
+  .topbar{margin:0 -18px;padding:12px 18px}
+  .budget-badge{flex-direction:column;gap:6px}
+  .pips{max-width:50%}
+  .arche{padding-left:16px}
+  .portrait{padding:20px}
+}
+
+.print-head{display:none}
+@media print{
+  .contour-field,.info-btn,.topbar,.actions,.no-print{display:none!important}
+  .print-head{
+    display:flex!important;justify-content:space-between;align-items:baseline;gap:16px;
+    border-bottom:1px solid #0D2220;padding-bottom:10px;margin-bottom:28px;
+  }
+  .print-head span:first-child{font-family:'Fraunces',Georgia,serif;font-size:1.1rem;color:#0D2220}
+  .print-head span:last-child{font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:#8B9A96}
+  body{background:#fff}
+  .screen{display:none!important;padding-top:0}
+  #s-diag{display:block!important;animation:none}
+  .wrap{max-width:100%;padding:0}
+  .radar-card,.scen,.axis-card,.fracture,.portrait{break-inside:avoid;box-shadow:none}
+  .diag-section{break-before:auto;margin-top:34px}
+  @page{margin:16mm}
+}
+</style>
+</head>
+<body>
+
+<svg class="contour-field" aria-hidden="true" preserveAspectRatio="none" viewBox="0 0 800 900">
+  <g fill="none" stroke="#0D2220" stroke-opacity=".055" stroke-width="1">
+    <path d="M-40 120 Q180 40 400 130 T860 90"/>
+    <path d="M-40 175 Q180 100 400 185 T860 148"/>
+    <path d="M-40 232 Q190 165 400 242 T860 210"/>
+    <path d="M-40 292 Q200 232 400 300 T860 275"/>
+    <path d="M-40 356 Q210 300 400 362 T860 342"/>
+    <path d="M-40 424 Q220 372 400 428 T860 412"/>
+    <path d="M-40 496 Q230 448 400 498 T860 486"/>
+    <path d="M-40 572 Q240 528 400 572 T860 564"/>
+    <path d="M-40 652 Q250 612 400 650 T860 646"/>
+    <path d="M-40 736 Q260 700 400 732 T860 732"/>
+    <path d="M-40 824 Q270 792 400 818 T860 822"/>
+  </g>
+</svg>
+
+<div class="wrap">
+
+<!-- 1 · BIENVENIDA -->
+<section class="screen on" id="s-welcome">
+  <svg class="hero-mark" width="112" height="112" viewBox="0 0 112 112" fill="none" aria-hidden="true">
+    <g stroke="#12A99E" stroke-opacity=".28" fill="none"><circle cx="56" cy="70" r="48"/><circle cx="56" cy="70" r="36"/><circle cx="56" cy="70" r="24"/><circle cx="56" cy="70" r="12"/></g>
+    <path d="M56 70 L56 14" stroke="#0D2220" stroke-width="1.4"/>
+    <circle cx="56" cy="14" r="4.5" fill="#D9922B"/>
+    <circle cx="56" cy="70" r="3" fill="#0D2220"/>
+  </svg>
+  <p class="eyebrow">Perfil de liderazgo de futuro</p>
+  <h1 style="margin-top:14px">El futuro no se<br>predice. Se presupuesta.</h1>
+  <div class="welcome-body">
+    <p class="lead">Nadie sabe qué va a pasar dentro de diez años. Esa es la mala noticia, y también la única buena: si el futuro estuviera decidido, no habría nada que hacer con él.</p>
+    <p>Lo que sí se puede saber es en qué estás invirtiendo hoy tu atención, tu tiempo, tu incomodidad. Un líder no llega preparado al futuro por haberlo adivinado. Llega preparado por haber cultivado, años antes y sin garantías, las capacidades que ese futuro terminó exigiéndole.</p>
+    <p>Aquí vas a repartir un presupuesto. No alcanza para todo. Ese es el punto.</p>
+  </div>
+  <div class="actions"><button class="btn" onclick="go('s-budget')">Empezar<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+</section>
+
+<!-- 2 · PRESUPUESTO -->
+<section class="screen" id="s-budget">
+  <p class="eyebrow">Tu presupuesto</p>
+  <div class="budget-badge">
+    <span class="num mono">24</span>
+    <span class="lbl">bonos para invertir en ocho capacidades. Máximo 5 en cada una.</span>
+  </div>
+  <div class="note"><strong>No estás calificando al líder que eres.</strong> Estás financiando al que quieres llegar a ser. Un cero no significa que carezcas de esa capacidad: significa que decidiste no invertir en ella.</div>
+  <h3 style="margin-top:38px">Antes de empezar</h3>
+  <ol class="tips">
+    <li><span>01</span>Un cinco cuesta caro: cada punto que subes aquí lo estás bajando allá.</li>
+    <li><span>02</span>Nadie llega lejos con un solo músculo. Los perfiles muy afilados atraviesan bien un tipo de terreno y se quiebran en el resto.</li>
+    <li><span>03</span>Repartir todo por igual también es una decisión, y suele ser la de quien prefiere no elegir.</li>
+    <li><span>04</span>Invierte donde estás más incómodo, no donde ya te va bien. Lo segundo se llama presupuestar hacia el pasado.</li>
+    <li><span>05</span>Vas a poder revisar tus decisiones. No vas a poder aumentar el presupuesto.</li>
+  </ol>
+  <h3 style="margin-top:38px">Las ocho capacidades</h3>
+  <div class="axis-preview" id="axisPreview"></div>
+  <div class="actions">
+    <button class="btn btn-teal" onclick="startInvest()">Invertir mis bonos</button>
+    <button class="btn-ghost btn" onclick="go('s-welcome')">Volver</button>
+  </div>
+</section>
+
+<!-- 3 · INVERSIÓN -->
+<section class="screen" id="s-invest">
+  <div class="topbar">
+    <div class="pips" id="pips"></div>
+    <div class="counter">quedan <b id="left">24</b> / 24</div>
+  </div>
+  <div class="progress-rail" id="rail"></div>
+  <div style="margin-top:34px">
+    <div class="axis-head">
+      <div class="axis-icon" id="axIcon"></div>
+      <div><p class="eyebrow" id="axCount"></p><h2 id="axName"></h2></div>
+    </div>
+    <p class="axis-desc" id="axDesc"></p>
+  </div>
+  <div class="invest">
+    <div class="invest-top">
+      <div><p class="eyebrow">Bonos invertidos</p></div>
+      <div class="big-val zero" id="axVal">0</div>
+    </div>
+    <div class="slider-holder">
+      <input type="range" id="axRange" min="0" max="5" step="1" value="0" aria-label="Bonos a invertir">
+      <div class="lock-zone hidden" id="lockZone"></div>
+      <div class="ticks" id="ticks"></div>
+    </div>
+    <div class="qual empty" id="qualBox"><p id="qualText"></p></div>
+    <div class="warn" id="warn"></div>
+  </div>
+  <div class="actions">
+    <button class="btn" id="nextBtn" onclick="nextAxis()">Siguiente</button>
+    <button class="btn-ghost btn" id="prevBtn" onclick="prevAxis()">Atrás</button>
+  </div>
+</section>
+
+<!-- 4 · PERFIL PRELIMINAR -->
+<section class="screen" id="s-flags">
+  <p class="eyebrow">Perfil preliminar</p>
+  <h1 style="margin-top:12px">Así quedó<br>tu presupuesto.</h1>
+  <p class="lead" style="margin-top:18px;max-width:52ch">Todavía no ves la figura. Antes conviene mirar qué sostiene y qué deja expuesto la manera en que repartiste.</p>
+  <div class="flag-grid" id="flagGrid"></div>
+  <div class="verdict" id="verdict"></div>
+</section>
+
+<!-- 5 · BONOS EXTRA -->
+<section class="screen" id="s-bonus">
+  <p class="eyebrow">Bonos de refuerzo</p>
+  <h1 style="margin-top:12px">Tres bonos más.</h1>
+  <p class="lead" style="margin-top:18px;max-width:52ch">Tu reparto sostiene el proceso completo, así que el presupuesto te devuelve tres bonos. Solo puedes ponerlos donde estás por debajo de tres: el refuerzo sirve para cubrir, no para engordar lo que ya está alto.</p>
+  <div class="counter" style="margin-top:26px;font-size:.95rem">te quedan <b id="bonusLeft">3</b> por asignar</div>
+  <div class="bonus-list" id="bonusList"></div>
+  <div class="actions"><button class="btn btn-teal" id="bonusBtn" onclick="finishBonus()">Ver escenario futuro</button></div>
+</section>
+
+<!-- 6 · DIAGNÓSTICO -->
+<section class="screen" id="s-diag">
+  <div class="print-head">
+    <span>El presupuesto del futuro</span>
+    <span>Perfil de liderazgo de futuro · 8 ejes · 24 bonos</span>
+  </div>
+  <div class="diag-section">
+    <p class="eyebrow">Diagnóstico</p>
+    <div class="radar-card"><div id="radarHolder"></div></div>
+    <div class="arche" id="arche"></div>
+    <div class="portrait" id="portrait"></div>
+  </div>
+  <div class="diag-section">
+    <p class="eyebrow">Los ocho ejes</p>
+    <h2 style="margin-top:10px">Dónde quedaste,<br>y qué hacer con eso.</h2>
+    <div id="axisCards" style="margin-top:26px"></div>
+  </div>
+  <div class="diag-section">
+    <p class="eyebrow">Terreno de construcción</p>
+    <h2 style="margin-top:10px">Tres escenarios futuros<br>donde este perfil construye.</h2>
+    <div id="scenList" style="margin-top:22px"></div>
+  </div>
+  <div class="diag-section">
+    <p class="eyebrow">Punto de fractura</p>
+    <h2 style="margin-top:10px">Y un escenario futuro<br>desafiante.</h2>
+    <div id="fracture" style="margin-top:20px"></div>
+  </div>
+  <div class="actions no-print">
+    <button class="btn btn-teal" onclick="window.print()">Descargar diagnóstico</button>
+    <button class="btn-ghost btn" onclick="restart()">Empezar de nuevo</button>
+  </div>
+</section>
+
+</div>
+
+<button class="info-btn no-print" onclick="toggleModal(true)" aria-label="Sobre esta herramienta">
+  <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7.4" stroke="currentColor" stroke-width="1.3"/><path d="M9 8v4.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="9" cy="5.5" r="1" fill="currentColor"/></svg>
+</button>
+
+<div class="modal" id="modal" onclick="if(event.target===this)toggleModal(false)">
+  <div class="modal-inner">
+    <button class="close-x" onclick="toggleModal(false)" aria-label="Cerrar">&times;</button>
+    <h3>Sobre esta herramienta</h3>
+    <p style="font-size:.94rem">Los ocho ejes de este perfil se derivaron del cruce entre tres libros sobre diseño y pensamiento de futuros. Ninguno propone estos ejes por separado: aparecen al leerlos juntos y subrayar lo que se repite entre ellos sin haberse citado nunca.</p>
+    <ul class="books">
+      <li><b>Imaginable</b>Jane McGonigal · 2022 · Spiegel &amp; Grau</li>
+      <li><b>The Field Guide to Design Futures</b>Giovanni Caruso y Silvio Cioni · 2026 · Fictional</li>
+      <li><b>Making Futures Work</b>Phil Balagtas · O'Reilly</li>
+    </ul>
+    <p style="font-size:.88rem;color:var(--ink-faint)">Cinco de los ejes siguen los momentos del proceso de Design Futures — encuadrar, escanear, sintetizar, visionar, narrar, decidir, actuar. El octavo, la empatía co-creadora, no es un momento del proceso: es la condición que decide si los otros siete se hacen con la gente o se le aplican encima.</p>
+    <div class="actions" style="margin-top:24px"><button class="btn" onclick="toggleModal(false)">Cerrar</button></div>
+  </div>
+</div>
+
+<script>
+/* ============ ICONOS ============ */
+const IC = {
+  encuadre:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M3 8V4h4M17 4h4v4M21 16v4h-4M7 20H3v-4"/><circle cx="12" cy="12" r="2.2"/></svg>',
+  senales:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="18" cy="18" r="1.6" fill="currentColor" stroke="none"/><path d="M14.2 18a3.8 3.8 0 0 1 3.8-3.8"/><path d="M10.4 18A7.6 7.6 0 0 1 18 10.4"/><path d="M6.6 18A11.4 11.4 0 0 1 18 6.6"/><path d="M2.8 18A15.2 15.2 0 0 1 18 2.8"/></svg>',
+  sistemico:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M6 6l6 4-4 8m4-8l6-3m-6 3 3 9" stroke-linecap="round"/><circle cx="6" cy="6" r="1.9"/><circle cx="12" cy="10" r="1.9"/><circle cx="18" cy="7" r="1.7"/><circle cx="8" cy="18" r="1.7"/><circle cx="15" cy="19" r="1.7"/></svg>',
+  prospeccion:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M2 17h20"/><path d="M4 13.4q4-3.2 8 0t8-1.4"/><path d="M6 9.6q3-2.4 6 0t6-1"/><circle cx="16" cy="5" r="2.4"/></svg>',
+  narrativa:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3 2.5 16h13L9 3Z"/><path d="M15.5 16H22M15.5 13H21M15.5 19H20"/></svg>',
+  discernimiento:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M4 19a10 10 0 0 1 16 0"/><path d="M12 19 17 8"/><circle cx="12" cy="19" r="1.6" fill="currentColor" stroke="none"/><path d="M7.5 12.5 9 14M16.5 12.5 15 14"/></svg>',
+  empatia:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25"><circle cx="9" cy="9.5" r="5.2"/><circle cx="15" cy="9.5" r="5.2"/><circle cx="12" cy="15" r="5.2"/></svg>',
+  optimismo:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M12 21v-9"/><path d="M12 12c0-3.3 2.4-6 5.5-6 0 3.3-2.4 6-5.5 6Z"/><path d="M12 15c0-2.8-2-5-4.8-5 0 2.8 2 5 4.8 5Z"/><path d="M8 21h8"/></svg>'
+};
+
+/* ============ DATOS ============ */
+const AXES = [
+{ id:'encuadre', name:'Encuadre', short:'Encuadre', icon:IC.encuadre,
+  desc:'La capacidad de definir qué se va a explorar antes de empezar a explorarlo. Delimitar el alcance, hacer visibles los supuestos que nadie declaró, distinguir la pregunta que importa de la que solo es urgente.',
+  lv:['No hay pregunta. Hay tareas.',
+      'Arrancas con lo que llegó primero. El problema es el que alguien puso sobre la mesa, y el alcance lo van dibujando los hechos a medida que ocurren.',
+      'Sospechas que la pregunta importa. A veces te detienes a formularla, casi siempre cuando ya empezaste y algo no cuadra.',
+      'Escribes la pregunta antes de moverte. Nombras el alcance, el horizonte, los supuestos que alcanzas a ver. Todavía se te cuelan los que no.',
+      'Distingues el problema del síntoma que te tocó. Sabes qué queda fuera y por qué, y lo dices en voz alta antes de que alguien invierta un peso.',
+      'Otros te buscan para encuadrar lo que ellos no logran nombrar. Encuentras el supuesto enterrado, el que sostenía toda la discusión sin que nadie lo hubiera mencionado.'],
+  pr:[['Antes de tu próxima reunión de decisión, escribe la pregunta que van a responder. Una sola frase. Si no te sale, esa es la señal.','Toma un proyecto en curso y lista tres supuestos que nadie ha puesto por escrito.','Pregunta en voz alta, una vez esta semana: ¿este es el problema o es el síntoma que nos tocó?'],
+      ['Convierte el encuadre en un ritual de arranque: alcance, horizonte, quiénes quedan por fuera.','Antes de cada proyecto, define explícitamente qué queda fuera del alcance. Lo excluido enseña más que lo incluido.','Entrevista a tres personas del equipo sobre qué creen que están resolviendo. Compara las tres respuestas.'],
+      ['Enseña el encuadre: haz que otro lidere el arranque mientras tú solo escuchas y anotas los supuestos que se cuelan.','Documenta los encuadres fallidos del último año y qué pregunta faltó hacer.','Instala una regla de equipo: ningún proyecto arranca sin un documento de encuadre de una página.']],
+  fr:'Vas a resolver con brillantez un problema que nadie te pidió resolver.' },
+
+{ id:'senales', name:'Lectura de señales', short:'Señales', icon:IC.senales,
+  desc:'La atención puesta en los márgenes: usos raros, comportamientos incipientes, casos concretos que todavía no son tendencia. Ver lo que pasa lejos del centro antes de que llegue al centro.',
+  lv:['El mundo te avisa por titular.',
+      'Te enteras cuando ya es tendencia. Lo raro te resulta ruido, y el ruido te resulta irrelevante.',
+      'Algo te llama la atención de vez en cuando. Lo comentas, se te olvida, no vuelves a buscarlo.',
+      'Guardas lo que te sorprende. Tienes un archivo, un hábito, una antena que a veces se enciende sola.',
+      'Miras donde nadie mira. Rastreas usos torpes, comportamientos marginales, casos concretos con nombre propio, y de ahí sacas la pregunta que todavía no está en ninguna agenda.',
+      'Tu lectura de los márgenes cambió decisiones que nadie relacionaba con eso. Y el equipo entero aprendió a escanear contigo.'],
+  pr:[['Busca esta semana una noticia que te haga decir "esto es rarísimo". Guárdala sin analizarla.','Sigue tres cuentas de personas que no comparten tu campo ni tu geografía.','Pregúntale a la persona más joven de tu equipo qué está usando que tú no conoces.'],
+      ['Abre un archivo de señales. Una entrada semanal: qué viste, dónde, qué pregunta te abrió.','Distingue tus señales de tus tendencias. Si cabe en dos palabras genéricas, no es una señal.','Sal del escritorio una vez al mes a observar dónde tu producto o servicio se usa mal.'],
+      ['Vuelve el archivo de señales un artefacto compartido y ritualizado con tu equipo.','Revisa tus señales de hace dos años. Cuáles crecieron, cuáles murieron, qué falló en tu criterio.','Financia a alguien del equipo para que escanee los márgenes como parte formal de su rol.']],
+  fr:'El cambio te va a llegar como noticia y no como preparación.' },
+
+{ id:'sistemico', name:'Pensamiento sistémico', short:'Sistémico', icon:IC.sistemico,
+  desc:'Convertir ruido en patrón. Rastrear la conexión entre piezas que parecen sueltas, distinguir el síntoma de la causa, resistir la tentación de arreglar lo que se ve para no tocar lo que sostiene.',
+  lv:['Cada problema es un problema nuevo.',
+      'Resuelves lo que arde. La causa queda para después, y después nunca llega.',
+      'Reconoces que el mismo problema vuelve. Lo atribuyes a la mala suerte, o a la persona equivocada en el puesto equivocado.',
+      'Sigues el hilo hacia atrás. Distingues el síntoma de lo que lo produce, aunque tocar el fondo casi siempre te parece demasiado costoso.',
+      'Mapeas el sistema antes de intervenirlo. Anticipas qué se rompe tres pasos más allá de la decisión que estás tomando.',
+      'Trabajas sobre las condiciones, no sobre los incendios. La organización deja de repetir sus propios errores porque cambiaste lo que los hacía posibles.'],
+  pr:[['Ante el próximo problema que aparezca, pregunta cinco veces por qué antes de proponer nada.','Identifica un problema que ya resolviste dos veces. Vuelve a mirarlo.','Dibuja en una hoja las tres cosas que tienen que fallar simultáneamente para que tu operación se detenga.'],
+      ['Mapea el sistema alrededor de una decisión reciente: quién se afecta, qué se mueve, qué se rompe después.','Distingue por escrito, en tu próximo diagnóstico, síntoma y enfermedad de fondo.','Rastrea una consecuencia no intencionada de una decisión que tomaste hace un año.'],
+      ['Construye con tu equipo un mapa del sistema completo y actualízalo cada semestre.','Introduce en la agenda una revisión trimestral de causas estructurales, separada de la revisión de resultados.','Enseña a otro a mapear. La habilidad se prueba cuando alguien más la ejecuta sin ti.']],
+  fr:'Vas a apagar el mismo incendio hasta que se te acabe el agua.' },
+
+{ id:'prospeccion', name:'Prospección vivida', short:'Prospección', icon:IC.prospeccion,
+  desc:'Imaginar un futuro con temperatura, rostros y detalle sensorial, no como proyección numérica. Habitar la escena antes de que exista, y sostener varias versiones a la vez.',
+  lv:['El futuro es una columna en una hoja de cálculo.',
+      'Proyectas el presente hacia adelante. Más de lo mismo, con otro número al final.',
+      'Imaginas cambios, siempre en abstracto. Sabes que el sector va a transformarse y no logras describir la escena.',
+      'Construyes escenarios con detalle. Aparecen personas, lugares, tensiones. Trabajas con uno a la vez.',
+      'Habitas varios futuros a la vez. Los sientes: qué se ve, qué molesta, quién gana y quién queda por fuera en cada uno.',
+      'Tus escenarios tienen tanta textura que quienes los escuchan empiezan a comportarse como si ya estuvieran ahí.'],
+  pr:[['Escribe un día completo de tu vida laboral dentro de diez años. Qué ves, qué escuchas, con quién estás.','Describe a un cliente tuyo del año 2036. Edad, contexto, qué le molesta.','Cambia una vez la pregunta "qué va a pasar" por "cómo se va a sentir".'],
+      ['Trabaja siempre con tres versiones del mismo futuro, no con una.','Escribe tus escenarios en presente y en primera persona. El tiempo verbal cambia lo que el cerebro hace con ellos.','Ponle nombre y rostro a los personajes de cada escenario que construyas.'],
+      ['Lleva a tu equipo a un ejercicio de inmersión de una jornada completa en un futuro a diez años.','Contrasta tus escenarios con gente que vive hoy algo parecido a lo que imaginaste.','Revisa anualmente los escenarios que escribiste y anota dónde te quedaste corto de imaginación.']],
+  fr:'Tus planes van a hablarle a un futuro que nadie logra imaginar.' },
+
+{ id:'narrativa', name:'Narrativa de futuros', short:'Narrativa', icon:IC.narrativa,
+  desc:'Sacar la visión de la propia cabeza y volverla algo que otros puedan tocar, discutir, rechazar. Una escena, un objeto, una historia que provoque la conversación que nadie estaba teniendo.',
+  lv:['Lo que imaginas se queda donde nació.',
+      'Explicas tu visión con datos y objetivos. Quien no la compartía desde antes, sigue sin compartirla.',
+      'Cuentas tu idea. Encuentras una imagen, un ejemplo, algo que engancha por un momento y después se disuelve.',
+      'Armas escenas con personajes y conflicto. La gente entiende hacia dónde vas, y algunos incluso lo recuerdan.',
+      'Fabricas objetos del futuro: un correo fechado en 2036, una queja de cliente que aún no existe. La sala reacciona antes de razonar.',
+      'Tus artefactos abren la conversación que la organización llevaba años esquivando. Otros aprenden a construir los suyos.'],
+  pr:[['Cuenta tu próxima visión como una escena con personajes, no como una lista de objetivos.','Dibuja algo. Malo. Un objeto que exista en ese futuro y hoy no.','Reemplaza una diapositiva de bullets por una imagen y una frase.'],
+      ['Construye un artefacto del futuro: un correo, un titular, un empaque, una queja de cliente fechada en 2036.','Prueba tu narrativa con alguien externo al proyecto y observa dónde se pierde.','Trabaja la mezcla de extrañeza y familiaridad: si nadie levanta una ceja, el artefacto no está haciendo nada.'],
+      ['Monta una exhibición interna de artefactos del futuro y convoca a quienes deciden.','Entrena a tu equipo en construir sus propios artefactos, no en aplaudir los tuyos.','Mide qué conversación se abrió después de mostrar la narrativa. Ese es el resultado, no el aplauso.']],
+  fr:'Vas a tener razón y nadie va a moverse contigo.' },
+
+{ id:'discernimiento', name:'Discernimiento', short:'Discernimiento', icon:IC.discernimiento,
+  desc:'Abrir el compás tanto como se pueda y después tener el criterio para cerrarlo. Sostener la ambigüedad sin ansiedad, y descartar sin nostalgia lo que no sirve.',
+  lv:['Otro decide, o decide el calendario.',
+      'Cierras rápido para que la incomodidad se acabe. La primera opción razonable se vuelve la definitiva.',
+      'Aguantas la ambigüedad un rato. Cuando la presión sube, resuelves con lo que hay a la mano.',
+      'Abres el abanico y después lo cierras con criterio. Descartar todavía te cuesta, sobre todo lo tuyo.',
+      'Sostienes la pregunta el tiempo que haga falta. Defines cómo vas a evaluar antes de tener qué evaluar, y matas lo que no sirve sin dolerte.',
+      'Lo que hoy te parece ridículo lo tratas como pista y no como amenaza. Y cuando cierras, cierras sobre la mesa entera, incluidas tus apuestas favoritas.'],
+  pr:[['Anota la próxima idea que te parezca ridícula. No la deseches. Pregúntate qué supuesto tuyo está tocando.','Deja una decisión abierta veinticuatro horas más de lo que te resulta cómodo.','Practica decir "todavía no sé" en una reunión, sin agregar nada después.'],
+      ['Establece por adelantado los criterios con los que vas a evaluar una visión, antes de tenerla.','Descarta formalmente una iniciativa este trimestre. Deja constancia de por qué.','Separa en el calendario el momento de abrir opciones del momento de cerrarlas. Nunca en la misma sesión.'],
+      ['Institucionaliza el descarte: un espacio donde matar proyectos sea un acto legítimo y sin costo reputacional.','Somete tus propias apuestas favoritas al mismo criterio con el que evalúas las ajenas.','Documenta las decisiones que resultaron equivocadas y qué señal ignoraste al tomarlas.']],
+  fr:'Vas a llenarte de opciones y quedarte sin decisión.' },
+
+{ id:'empatia', name:'Empatía co-creadora', short:'Empatía', icon:IC.empatia,
+  desc:'Construir el futuro con gente cuya experiencia uno nunca compartió. Fabricar comprensión donde no hay referencia propia, y abrir la mesa de verdad, no como gesto.',
+  lv:['El futuro que construyes cabe en una sola cabeza.',
+      'Decides por otros con buena intención. Sabes lo que necesitan porque lo supones.',
+      'Consultas al equipo cercano. La mesa la componen quienes ya piensan parecido a ti.',
+      'Preguntas y escuchas. Invitas voces distintas, aunque la decisión final se cocine después, en otra sala más pequeña.',
+      'Construyes con gente cuya experiencia nunca compartiste. Su aporte cambia el resultado, no lo decora.',
+      'Cedes el timón a quien tiene menos poder formal y más terreno recorrido. En tus escenarios aparece lo que en tu organización no tiene voz.'],
+  pr:[['Busca el testimonio de alguien que vive algo que tú nunca viviste. Léelo entero, sin buscar la lección.','En tu próxima decisión, nombra a tres personas que se van a ver afectadas y que no estaban en la sala.','Pregunta, sin proponer nada después: ¿qué te preocupa de hacia dónde vamos?'],
+      ['Invita a una sesión de futuro a alguien que normalmente no sería invitado.','Reemplaza tu suposición sobre lo que otro necesita por una conversación directa donde solo escuchas.','Cuando imagines un futuro, pregúntale a quien lo va a habitar qué le entusiasma y qué le inquieta.'],
+      ['Cede la facilitación de una sesión de futuros a alguien del equipo con menos poder formal.','Construye el proceso de manera que las decisiones dependan del aporte del grupo, no lo decoren.','Incluye en tus escenarios lo que no tiene voz en tu organización: territorios, generaciones futuras, comunidades afectadas.']],
+  fr:'Vas a construir un futuro que solo te sirve a ti.' },
+
+{ id:'optimismo', name:'Optimismo urgente', short:'Optimismo', icon:IC.optimismo,
+  desc:'Ver lo que puede salir bien y lo que puede salir mal sin que ninguna de las dos visiones paralice a la otra, y convertir eso en un movimiento que empieza hoy, en el presente, con lo que hay.',
+  lv:['Ves lo que viene y te quedas donde estás.',
+      'Oscilas entre el entusiasmo y la parálisis. La amenaza te congela, la oportunidad te dispersa.',
+      'Sostienes el ánimo del equipo. El largo plazo aparece en los discursos y desaparece en la agenda del lunes.',
+      'Miras lo que puede salir bien y lo que puede salir mal el mismo día, sin que ninguna de las dos te detenga.',
+      'Traduces la visión a diez años en compromisos con fecha para este trimestre. El fracaso lo tratas como información.',
+      'El largo plazo tiene presupuesto, rol y reunión recurrente. Y tu equipo sabe que equivocarse aquí no cuesta la cabeza.'],
+  pr:[['Para el próximo cambio que te preocupe, escribe qué podría salir bien y qué podría salir mal. Las dos columnas, el mismo día.','Identifica una cosa que puedas empezar esta semana hacia un futuro que quieres.','Nombra en voz alta un miedo del equipo que nadie ha nombrado.'],
+      ['Practica el backcasting: parte del futuro deseado y camina hacia atrás hasta el lunes siguiente.','Convierte una visión a diez años en tres compromisos con fecha para este trimestre.','Haz un premortem antes de arrancar: imagina que fracasó y explica por qué.'],
+      ['Ancla estructuralmente el largo plazo: un porcentaje del presupuesto, un rol, una reunión recurrente.','Trata públicamente un fracaso propio como materia prima y no como vergüenza.','Revisa cada semestre qué visiones dejaste guardadas por no encontrar cómo empezarlas.']],
+  fr:'Vas a ver el futuro con toda claridad, sentado.' }
+];
+
+const T = { leer:[0,1,2], imaginar:[3,4], actuar:[5,7], empatia:[6] };
+
+const ARCHE = {
+  cartografo:{n:'El Cartógrafo',d:'Levanta el mapa antes de que nadie sepa que hace falta un mapa. Encuadra bien, ve lo que otros pasan por alto, entiende cómo se conecta todo.',c:'Los mapas más precisos también sirven para justificar no salir del campamento.'},
+  escenografo:{n:'El Escenógrafo',d:'Construye futuros que la gente puede habitar. Sus escenas tienen textura, sus artefactos incomodan, sus historias mueven salas enteras.',c:'Una escena convincente puede sostenerse sobre un diagnóstico que nunca hizo.'},
+  constructor:{n:'El Constructor',d:'Decide y arranca. Descarta sin nostalgia, sostiene el ánimo del equipo, convierte el largo plazo en un lunes.',c:'La velocidad de ejecución nunca compensa un destino mal elegido.'},
+  tejedor:{n:'El Tejedor',d:'Su mesa es siempre más grande de lo que exige el protocolo. Construye el futuro con la gente que va a vivirlo, incluida la que nadie invitó.',c:'Una mesa amplia sin criterio produce conversaciones extraordinarias y ninguna decisión.'},
+  vigia:{n:'El Vigía',d:'Detecta y responde. Corta distancia entre la señal y el movimiento, sin detenerse a fantasear en el medio.',c:'Responde muy bien a futuros que ya se están asomando, y llega tarde a los que había que inventar.'},
+  pionero:{n:'El Pionero',d:'Ve el territorio nuevo y camina hacia allá antes de que existan los caminos.',c:'Salió antes de mirar el mapa, y en algún punto tendrá que devolverse.'},
+  faro:{n:'El Faro',d:'Ilumina hacia dónde ir y lo hace con la gente adentro. Sus visiones son colectivas desde el origen.',c:'La luz señala el rumbo y no mueve el barco.'},
+  baquiano:{n:'El Baquiano',d:'Conoce el terreno porque escuchó a quienes lo caminan. Su lectura del entorno viene de las voces que otros no consultan.',c:'Nadie llega a un lugar nuevo guiándose solo por lo que ya está trazado.'},
+  equilibrista:{n:'El Equilibrista',d:'Ningún pico, ningún hueco. Sostiene el proceso completo de punta a punta sin quebrarse en ningún tramo.',c:'Un perfil sin firma reconocible rara vez es convocado para lo que nadie más puede hacer.'}
+};
+
+const SCEN = [
+ {t:'La conversación que nadie abre',d:'Hay un tema que divide a tu comunidad y todos aprendieron a rodearlo. Alguien tiene que ponerlo en el centro sin que la mesa se rompa, y sostener lo que aparezca después.',r:[6,0,5]},
+ {t:'El oficio que deja de existir',d:'Aquello que sabías hacer, y que durante años te dijo quién eras, deja de ser necesario. La pregunta no es cómo sobrevivir al cambio: es qué quieres ser cuando ya no puedas ser lo que eras.',r:[1,5,7]},
+ {t:'La verdad en disputa',d:'Circulan tres versiones incompatibles del mismo hecho y todas vienen con evidencia. Hay que decidir sin certeza, y hacerlo de manera que la gente pueda seguir confiando en cómo decidiste.',r:[5,2,0]},
+ {t:'Los que vienen después',d:'Una decisión de hoy va a afectar sobre todo a personas que aún no han nacido. No pueden reclamarte, no pueden votarte, no van a saber tu nombre. Alguien tiene que representarlos en la mesa.',r:[3,6,2]},
+ {t:'El lugar que cambia bajo tus pies',d:'El barrio, la ciudad, el país donde creciste se transforma más rápido de lo que alcanzas a adaptarte. Puedes vivirlo como pérdida o leerlo como el primer capítulo de algo que todavía se puede orientar.',r:[1,3,7]},
+ {t:'El que piensa distinto y no se va a ir',d:'Compartes territorio con alguien cuyos supuestos básicos no son los tuyos, y ninguno de los dos tiene la opción de mudarse. Construir algo juntos empieza por entender de dónde salió esa manera de ver el mundo.',r:[6,5]},
+ {t:'La herencia que hay que soltar',d:'Una costumbre, una tradición, una manera de hacer las cosas que te dieron y que ya no sostiene a nadie. Soltarla sin despreciar a quienes la construyeron es más difícil que defenderla o que quemarla.',r:[5,0,4]},
+ {t:'El futuro que nadie te contó',d:'A tu alrededor nadie imagina otra cosa que la repetición del presente, y esa falta de imaginación se siente como realismo. Alguien tiene que describir en voz alta una versión distinta y hacerla creíble.',r:[3,4,7]},
+ {t:'Lo que se rompe de golpe',d:'El clima, la salud, la economía: algo cede sin aviso y arrastra lo que parecía firme. Lo que se hizo antes de la crisis pesa más que lo que se haga durante, y siempre queda algo por reconstruir mejor.',r:[2,7,5]},
+ {t:'La tecnología que llegó antes que las reglas',d:'Algo nuevo entra a tu casa, a tu familia, a tu conversación diaria, y altera cómo viven antes de que nadie haya decidido cómo debería usarse. Las reglas las va a escribir quien esté prestando atención.',r:[1,6,2]},
+ {t:'El grupo que perdió el para qué',d:'Una familia, un colectivo, un vecindario que sigue funcionando por inercia y ya no recuerda qué lo reunió. Devolverles un motivo no se hace con un discurso: se hace con una historia en la que puedan reconocerse.',r:[7,4,6]},
+ {t:'Lo que está naciendo en los bordes',d:'Hay algo apareciendo en los márgenes, todavía torpe y minoritario, que en diez años puede ser la manera normal de vivir. Verlo temprano no da ventaja: da tiempo para decidir qué hacer con eso.',r:[1,3,0]}
+];
+
+const FRACT = [
+ {t:'El problema que llega ya envuelto',d:'Alguien te entrega la pregunta ya formulada, con la urgencia incluida y el alcance definido por otro. Todo el mundo alrededor está de acuerdo en qué hay que resolver, y nadie recuerda quién lo decidió. Aceptas el paquete y empiezas a trabajar.'},
+ {t:'El cambio que ya empezó sin ti',d:'Algo lleva años ocurriendo en los bordes: gente joven usando las cosas al revés, costumbres que se van corriendo de lugar, prácticas que hoy parecen anécdota. Cuando eso llega al centro y aparece en los titulares, ya no es una oportunidad. Es una noticia.'},
+ {t:'El problema que vuelve con otra cara',d:'Resuelves algo y respiras. Seis meses después vuelve, con distinto nombre, distinta gente, distinto disfraz, y lo resuelves otra vez. Lo que sostiene el problema quedó intacto porque nunca fue lo que estaba a la vista.'},
+ {t:'El futuro que solo existe en cifras',d:'Tienes proyecciones, curvas, escenarios numerados. Sabes qué va a crecer y qué va a caer. Pero nadie logra decir qué se va a sentir al despertar en ese mundo, y por eso nadie, incluido tú, actúa como si de verdad fuera a llegar.'},
+ {t:'La razón que nadie sigue',d:'Tienes razón. Lo viste antes, lo entendiste mejor, puedes demostrarlo. Y la gente sigue haciendo lo mismo de siempre, porque una razón sin escena, sin rostro, sin historia donde alguien pueda reconocerse, no mueve a nadie de su lugar.'},
+ {t:'La mesa llena de opciones',d:'Recogiste todo: voces, señales, escenarios, posibilidades. La mesa está llena y todo parece igual de válido. Llega el momento de cerrar y no hay criterio, solo cansancio, y entonces decide el calendario, o decide otro, o no decide nadie.'},
+ {t:'El futuro de una sola persona',d:'Construiste algo coherente, ambicioso, bien pensado. Funciona para gente que se parece a ti. Los demás lo reciben ya terminado, sin haber sido consultados, y descubren en el uso lo que nadie previó porque nadie estaba ahí para preverlo.'},
+ {t:'La claridad que no mueve nada',d:'Ves lo que viene con una nitidez que te da miedo. Sabes lo que habría que hacer, incluso por dónde empezar. Y el lunes llega igual que siempre, con su agenda intacta, y lo que viste se queda donde estaba: en tu cabeza, esperando el momento adecuado.'}
+];
+
+/* ============ ESTADO ============ */
+const TOTAL=24;
+let v=[0,0,0,0,0,0,0,0], cur=0, pass=1, bonusPool=0, bonusAdd=[0,0,0,0,0,0,0,0];
+const spent=()=>v.reduce((a,b)=>a+b,0);
+const left=()=>TOTAL-spent();
+
+/* ============ NAVEGACIÓN ============ */
+function go(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  window.scrollTo({top:0,behavior:'instant'});
+}
+function toggleModal(on){document.getElementById('modal').classList.toggle('on',on)}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')toggleModal(false)});
+
+/* preview de ejes */
+document.getElementById('axisPreview').innerHTML =
+  AXES.map(a=>`<div>${a.icon}${a.name}</div>`).join('');
+
+/* ============ INVERSIÓN ============ */
+function startInvest(){cur=0;go('s-invest');renderAxis()}
+
+function renderTicks(){
+  const cap=Math.min(5, v[cur]+left());
+  document.getElementById('ticks').innerHTML=[0,1,2,3,4,5].map(n=>{
+    const cls=[n===v[cur]?'hot':'', n>cap?'locked':''].filter(Boolean).join(' ');
+    return `<span class="${cls}" style="left:calc(13px + ${n/5} * (100% - 26px))">${n}</span>`;
+  }).join('');
+  const lz=document.getElementById('lockZone');
+  lz.classList.toggle('hidden', cap>=5);
+  if(cap<5){
+    lz.style.left=`calc(13px + ${cap/5} * (100% - 26px))`;
+    lz.style.width=`calc(${(5-cap)/5} * (100% - 26px))`;
+  }
+}
+
+function renderAxis(){
+  const a=AXES[cur];
+  document.getElementById('axIcon').innerHTML=a.icon;
+  document.getElementById('axName').textContent=a.name;
+  document.getElementById('axDesc').textContent=a.desc;
+  document.getElementById('axCount').textContent=`Eje ${cur+1} de 8`;
+  const r=document.getElementById('axRange');
+  r.max=5; r.value=v[cur];
+  renderTicks();
+  document.getElementById('rail').innerHTML=AXES.map((_,i)=>
+    `<i class="${i<cur?'done':i===cur?'now':''}"></i>`).join('');
+  document.getElementById('prevBtn').style.display = cur===0?'none':'inline-flex';
+  document.getElementById('nextBtn').textContent = cur===7?'Ver perfil preliminar':'Siguiente';
+  paintQual(true);
+  updateBar();
+}
+
+let qualTimer=null;
+function paintQual(instant){
+  const a=AXES[cur], n=v[cur];
+  const box=document.getElementById('qualBox'), tx=document.getElementById('qualText');
+  const bv=document.getElementById('axVal');
+  bv.textContent=n; bv.classList.toggle('zero',n===0);
+  box.classList.toggle('empty',n===0);
+  clearTimeout(qualTimer);
+  const set=()=>{tx.textContent=a.lv[n];tx.classList.remove('faded')};
+  if(instant){set()} else {tx.classList.add('faded');qualTimer=setTimeout(set,140)}
+  checkWarn();
+}
+
+function checkWarn(){
+  const w=document.getElementById('warn'), nb=document.getElementById('nextBtn');
+  const rest=7-cur, cap=Math.min(5, v[cur]+left());
+  if(cap===0){
+    w.textContent='Se acabó el presupuesto. Eso también es un perfil.';
+  } else if(left()===0 && cur<7){
+    w.textContent='Se acabó el presupuesto. Eso también es un perfil.';
+  } else if(cur===7 && left()>0){
+    w.textContent=`Te quedan ${left()} bonos sin repartir. No puedes guardarlos.`;
+  } else if(rest>0 && left()<rest){
+    w.textContent=`Quedan ${rest} ejes por delante y ${left()} bonos disponibles.`;
+  } else if(cap<5){
+    w.textContent=`Con lo que queda solo puedes llegar hasta ${cap} en este eje.`;
+  } else { w.textContent=''; }
+  nb.disabled = (cur===7 && left()>0);
+}
+
+function updateBar(){
+  document.getElementById('left').textContent=left();
+  document.getElementById('pips').innerHTML=
+    Array.from({length:TOTAL},(_,i)=>`<span class="pip ${i>=left()?'spent':''}"></span>`).join('');
+}
+
+document.getElementById('axRange').addEventListener('input',e=>{
+  const want=+e.target.value, cap=Math.min(5, v[cur]+left());
+  v[cur]=Math.min(want,cap);
+  e.target.value=v[cur];
+  renderTicks();
+  paintQual(false); updateBar();
+});
+
+function nextAxis(){
+  if(cur===7){ if(left()>0) return; evaluate(); return; }
+  cur++; renderAxis();
+}
+function prevAxis(){ if(cur>0){cur--;renderAxis()} }
+
+/* ============ FLAGS ============ */
+function sum(ix){return ix.reduce((s,i)=>s+v[i],0)}
+
+function evaluate(){
+  const L=sum(T.leer), I=sum(T.imaginar), A=sum(T.actuar), E=v[6];
+  const red=[], green=[];
+
+  const zeros=AXES.filter((a,i)=>v[i]===0).map(a=>a.name);
+  if(zeros.length) red.push(`Punto ciego declarado: ${zeros.join(', ')}. Un cero no es una debilidad, es una zona sin financiar.`);
+  if(L<3) red.push('El tiempo de leer quedó desatendido. Vas a decidir sobre un terreno que no levantaste.');
+  if(I<3) red.push('El tiempo de imaginar quedó desatendido. Vas a actuar hacia un destino que nunca describiste.');
+  if(A<3) red.push('El tiempo de decidir y actuar quedó desatendido. Vas a ver el futuro sin tocarlo.');
+  if(E<=1) red.push('Con la empatía co-creadora tan baja, estás construyendo el futuro de una sola persona.');
+  if(v.filter(x=>x===5).length>=4) red.push('Apuesta rígida: cuatro o más ejes al máximo. Si el terreno cambia, no te queda con qué recalibrar.');
+  if(v.every(x=>x===v[0])) red.push('Perfil enteramente plano. Repartiste sin decidir, y eso deja tu liderazgo sin firma.');
+  if(Math.abs(I-A)>6) red.push(I>A?'Visión sin aterrizaje: imaginas mucho más de lo que decides y ejecutas.':'Ejecución sin destino: decides y actúas mucho más de lo que imaginas.');
+
+  if(!zeros.length) green.push('Ningún eje en cero. Todo el proceso tiene al menos algo de financiación.');
+  if(L>=6&&I>=4&&A>=4) green.push('Los tres tiempos con presencia real: lees, imaginas y actúas sin abandonar ninguno.');
+  if(v.filter(x=>x>=4).length>=2) green.push('Al menos dos ejes por encima de cuatro. Tu perfil tiene una firma reconocible.');
+  if(E>=3) green.push('La empatía co-creadora sostiene el resto: construyes con gente, no sobre ella.');
+  if(v[0]>=3&&v[5]>=3) green.push('Encuadre y discernimiento arriba: sabes empezar y sabes cerrar.');
+
+  /* el veredicto se decide con las banderas de fondo, antes de los complementos */
+  const coreRed=red.length, coreGreen=green.length;
+
+  /* nadie sale sin ver las dos caras: complementos de matiz */
+  let lo=0, hi=0;
+  for(let i=1;i<8;i++){ if(v[i]<v[lo]) lo=i; if(v[i]>v[hi]) hi=i; }
+  const gap=v[hi]-v[lo];
+  if(v[lo]<=2 && !zeros.length) red.push(`${AXES[lo].name} quedó en ${v[lo]}. Es el eje por donde el perfil cede primero.`);
+  if(gap>=3) red.push(`Hay ${gap} puntos de distancia entre ${AXES[hi].name} y ${AXES[lo].name}. Los perfiles muy inclinados atraviesan bien un terreno y se quiebran en el resto.`);
+  if(!red.length) red.push(`Tu eje más bajo es ${AXES[lo].name}, con ${v[lo]}. Ninguna zona está desatendida, pero por ahí empezaría a ceder.`);
+  if(!green.length) green.push(`Tu apuesta más fuerte es ${AXES[hi].name}, con ${v[hi]}. Ahí está lo que este perfil sabe hacer.`);
+
+  document.getElementById('flagGrid').innerHTML=
+    `<div class="flag-box green"><h3><i class="dot g"></i>Green flags</h3><ul>${green.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+     <div class="flag-box red"><h3><i class="dot r"></i>Red flags</h3><ul>${red.map(x=>`<li>${x}</li>`).join('')}</ul></div>`;
+
+  const vd=document.getElementById('verdict');
+  const eligibles=AXES.map((a,i)=>i).filter(i=>v[i]<=2);
+
+  if(coreRed>coreGreen && pass===1){
+    vd.innerHTML=`<h2>Tienes más red flags que green flags.</h2>
+      <p style="max-width:52ch">Puedes volver y redistribuir lo que ya invertiste. El presupuesto sigue siendo el mismo: veinticuatro. Una sola vuelta.</p>
+      <div class="actions">
+        <button class="btn btn-teal" onclick="reinvest()">Redistribuir mis bonos</button>
+        <button class="btn-ghost btn" onclick="toDiag()">Seguir así</button>
+      </div>`;
+  } else if(coreGreen>coreRed && eligibles.length){
+    vd.innerHTML=`<h2>Ganaste tres bonos de refuerzo.</h2>
+      <p style="max-width:52ch">Tus green flags le ganaron a tus red flags: repartiste de manera que el proceso completo se sostiene, de punta a punta. El presupuesto te premia con tres bonos más. Solo puedes ponerlos donde estás por debajo de tres, que es justo donde tus red flags te están señalando.</p>
+      <div class="actions"><button class="btn btn-teal" onclick="openBonus()">Reclamar los tres bonos</button></div>`;
+  } else {
+    const flat=v.every(x=>x===v[0]);
+    let h,t;
+    if(flat){
+      h='Repartiste sin decidir.';
+      t='No hay zonas bajas que reforzar porque tampoco hay zonas altas. Un perfil parejo atraviesa cualquier terreno sin quebrarse y sin destacar en ninguno.';
+    } else if(coreGreen>coreRed){
+      h='Green flags por encima de red flags, sin zonas bajas que reforzar.';
+      t='No dejaste ningún eje por debajo de tres, así que los bonos de refuerzo no tendrían dónde ir.';
+    } else {
+      h='Green flags y red flags en empate.';
+      t='Ni lo que sostienes ni lo que dejas expuesto se impone sobre lo otro. Así queda el presupuesto.';
+    }
+    vd.innerHTML=`<h2>${h}</h2><p style="max-width:52ch">${t}</p>
+      <div class="actions"><button class="btn btn-teal" onclick="toDiag()">Ver escenario futuro</button>
+      ${pass===1?'<button class="btn-ghost btn" onclick="reinvest()">Redistribuir mis bonos</button>':''}</div>`;
+  }
+  go('s-flags');
+}
+
+function reinvest(){ pass=2; cur=0; go('s-invest'); renderAxis(); }
+
+/* ============ BONOS EXTRA ============ */
+function openBonus(){
+  bonusPool=3; bonusAdd=[0,0,0,0,0,0,0,0];
+  renderBonus(); go('s-bonus');
+}
+function renderBonus(){
+  const el=document.getElementById('bonusList');
+  const rows=AXES.map((a,i)=>({a,i})).filter(o=>v[o.i]-bonusAdd[o.i]<=2);
+  el.innerHTML=rows.map(o=>`
+    <div class="bonus-row">
+      <div><div class="nm">${o.a.name}</div><div class="sub mono">${v[o.i]} bonos</div></div>
+      <div class="stepper">
+        <button onclick="bonusStep(${o.i},-1)" ${bonusAdd[o.i]<=0?'disabled':''} aria-label="Quitar">−</button>
+        <span class="v">${bonusAdd[o.i]}</span>
+        <button onclick="bonusStep(${o.i},1)" ${bonusPool<=0||v[o.i]>=5?'disabled':''} aria-label="Añadir">+</button>
+      </div>
+    </div>`).join('');
+  document.getElementById('bonusLeft').textContent=bonusPool;
+  document.getElementById('bonusBtn').disabled = bonusPool>0;
+}
+function bonusStep(i,d){
+  if(d>0){ if(bonusPool<=0||v[i]>=5) return; v[i]++; bonusAdd[i]++; bonusPool--; }
+  else { if(bonusAdd[i]<=0) return; v[i]--; bonusAdd[i]--; bonusPool++; }
+  renderBonus();
+}
+function finishBonus(){ if(bonusPool>0) return; toDiag(); }
+
+/* ============ DIAGNÓSTICO ============ */
+function pickArche(){
+  const L=sum(T.leer)/15, I=sum(T.imaginar)/10, A=sum(T.actuar)/10, E=v[6]/5;
+  const arr=[['L',L],['I',I],['A',A],['E',E]].sort((a,b)=>b[1]-a[1]);
+  if(arr[0][1]-arr[3][1] < .15) return ARCHE.equilibrista;
+  const [k1,s1]=arr[0], [k2,s2]=arr[1];
+  if(s1-s2 < .10){
+    const p=[k1,k2].sort().join('');
+    if(p==='AL') return ARCHE.vigia;
+    if(p==='AI') return ARCHE.pionero;
+    if(p==='EI') return ARCHE.faro;
+    if(p==='EL') return ARCHE.baquiano;
+  }
+  return {L:ARCHE.cartografo,I:ARCHE.escenografo,A:ARCHE.constructor,E:ARCHE.tejedor}[k1];
+}
+
+function radarSVG(){
+  const cx=280,cy=220,R=130,N=8;
+  const ang=i=>(-90+i*45)*Math.PI/180;
+  const pt=(i,r)=>[cx+Math.cos(ang(i))*r, cy+Math.sin(ang(i))*r];
+  const poly=r=>Array.from({length:N},(_,i)=>pt(i,r).map(n=>n.toFixed(1)).join(',')).join(' ');
+  let rings='';
+  for(let k=1;k<=5;k++){
+    const r=R*k/5;
+    rings+=`<polygon points="${poly(r)}" fill="none" stroke="#0D2220" stroke-opacity="${k===5?.22:.1}" stroke-width="1" ${k%2===0?'stroke-dasharray="2 4"':''}/>`;
+    rings+=`<text x="${cx+3}" y="${(cy-r+3).toFixed(1)}" font-family="JetBrains Mono, monospace" font-size="8.5" fill="#8B9A96">${k}</text>`;
+  }
+  let spokes='';
+  for(let i=0;i<N;i++){const [x,y]=pt(i,R);spokes+=`<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#0D2220" stroke-opacity=".09"/>`}
+  const shape=Array.from({length:N},(_,i)=>pt(i,R*v[i]/5).map(n=>n.toFixed(1)).join(',')).join(' ');
+  let dots='',labels='';
+  for(let i=0;i<N;i++){
+    const [dx,dy]=pt(i,R*v[i]/5);
+    if(v[i]>0) dots+=`<circle cx="${dx.toFixed(1)}" cy="${dy.toFixed(1)}" r="3.4" fill="#12A99E" stroke="#F1F4F2" stroke-width="1.6"/>`;
+    const [lx,ly]=pt(i,R+34);
+    const c=Math.cos(ang(i));
+    const anc=Math.abs(c)<.2?'middle':(c>0?'start':'end');
+    labels+=`<text x="${lx.toFixed(1)}" y="${(ly+4).toFixed(1)}" text-anchor="${anc}" font-family="Inter Tight, sans-serif" font-size="12" font-weight="500" fill="#0D2220">${AXES[i].short}</text>`;
+    labels+=`<text x="${lx.toFixed(1)}" y="${(ly+18).toFixed(1)}" text-anchor="${anc}" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#12A99E">${v[i]}</text>`;
+  }
+  return `<svg viewBox="0 0 560 470" role="img" aria-label="Diagrama de radar del perfil de liderazgo de futuro">
+    <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1ABCB0" stop-opacity=".30"/><stop offset="100%" stop-color="#D9922B" stop-opacity=".18"/>
+    </linearGradient></defs>
+    ${rings}${spokes}
+    <polygon points="${shape}" fill="url(#g)" stroke="#12A99E" stroke-width="2" stroke-linejoin="round"/>
+    ${dots}${labels}</svg>`;
+}
+
+function toDiag(){
+  document.getElementById('radarHolder').innerHTML=radarSVG();
+
+  const A=pickArche();
+  document.getElementById('arche').innerHTML=
+    `<p class="eyebrow">Tu arquetipo</p><h2>${A.n}</h2><p>${A.d}</p>
+     <div class="cost"><b>El costo de esta apuesta.</b> ${A.c}</div>`;
+
+  document.getElementById('portrait').innerHTML=
+    `<p>${AXES.map((a,i)=>a.lv[v[i]]).join(' ')}</p>`;
+
+  document.getElementById('axisCards').innerHTML=AXES.map((a,i)=>{
+    const n=v[i], b=n<=1?0:n<=3?1:2;
+    const bn=['Abrir','Estructurar','Multiplicar'][b];
+    return `<div class="axis-card">
+      <div class="axis-card-head"><div class="axis-icon">${a.icon}</div><h3>${a.name}</h3>
+        <div class="score"><b>${n}</b>/5</div></div>
+      <p class="qtext">${a.lv[n]}</p>
+      <span class="band">Prácticas · ${bn}</span>
+      <ol>${a.pr[b].map(p=>`<li>${p}</li>`).join('')}</ol>
+    </div>`;
+  }).join('');
+
+  const ranked=SCEN.map(s=>({s,sc:s.r.reduce((t,i)=>t+v[i],0)/s.r.length}))
+                   .sort((a,b)=>b.sc-a.sc).slice(0,3);
+  document.getElementById('scenList').innerHTML=ranked.map(o=>
+    `<div class="scen"><h3>${o.s.t}</h3><p>${o.s.d}</p>
+     <div class="tags">${o.s.r.map(i=>`<i>${AXES[i].short} ${v[i]}</i>`).join('')}</div></div>`).join('');
+
+  let lo=0; for(let i=1;i<8;i++) if(v[i]<v[lo]) lo=i;
+  document.getElementById('fracture').innerHTML=
+    `<div class="fracture">
+      <p class="eyebrow">${AXES[lo].name} · ${v[lo]}/5</p>
+      <h3 class="fr-title">${FRACT[lo].t}</h3>
+      <p class="fr-body">${FRACT[lo].d}</p>
+      <p>${AXES[lo].fr}</p>
+    </div>`;
+
+  go('s-diag');
+}
+
+function restart(){
+  v=[0,0,0,0,0,0,0,0]; cur=0; pass=1; bonusPool=0; bonusAdd=[0,0,0,0,0,0,0,0];
+  go('s-welcome');
+}
+</script>
+</body>
+</html>
