@@ -220,8 +220,48 @@ input[type=range]:active::-webkit-slider-thumb{transform:scale(1.12)}
 .books b{color:var(--ink);font-weight:600;display:block;font-family:'Fraunces',serif;font-size:1rem}
 .close-x{float:right;font-size:1.4rem;line-height:1;color:var(--ink-faint);margin:-8px -8px 0 0}
 
+.gloss{margin-top:12px;font-size:.8rem;line-height:1.5;color:var(--ink-faint);font-style:italic}
+
+/* atlas de arquetipos */
+.atlas-link{margin-top:22px;display:flex;align-items:center;gap:14px;width:100%;text-align:left;border:1px solid var(--line);border-radius:12px;padding:16px 20px;background:var(--paper);transition:border-color .18s,background .18s}
+.atlas-link:hover{border-color:var(--teal);background:#fff}
+.atlas-link .t{flex:1;font-size:.96rem;font-weight:500;color:var(--ink);line-height:1.35}
+.atlas-link .t small{display:block;font-weight:400;font-size:.82rem;color:var(--ink-faint);margin-top:2px}
+.atlas-link .arr{font-family:'JetBrains Mono',monospace;color:var(--teal);font-size:1.05rem}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px}
+.chip{border:1px solid var(--line);border-radius:999px;padding:8px 15px;font-size:.86rem;color:var(--ink-soft);background:var(--paper);display:inline-flex;align-items:center;gap:8px;transition:background .15s,color .15s,border-color .15s}
+.chip:hover{border-color:var(--ink-faint);color:var(--ink)}
+.chip.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.chip .mine{width:7px;height:7px;border-radius:50%;background:var(--teal);flex:none}
+.atlas-card{margin-top:20px;border:1px solid var(--line);border-radius:14px;padding:26px 28px;background:var(--paper);box-shadow:var(--shadow)}
+.atlas-card .weight{font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--teal)}
+.atlas-card .weight em{font-style:normal;color:var(--amber)}
+.atlas-card h3{font-size:1.65rem;margin:10px 0 12px}
+.atlas-card .cost{margin-top:14px;font-size:.93rem;color:var(--ink-soft);border-top:1px dashed var(--line);padding-top:12px}
+.atlas-card .cost b{color:var(--amber);font-weight:600}
+.who{margin-top:16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:.82rem;color:var(--ink-faint)}
+.who button{font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:var(--teal);border:1px solid rgba(18,169,158,.35);padding:4px 10px;border-radius:999px}
+.who button:hover{background:var(--teal);color:var(--paper)}
+.char-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:26px}
+.char-tab{border:1px solid var(--line);border-radius:10px;padding:11px 13px;text-align:left;background:var(--paper);transition:border-color .15s}
+.char-tab:hover{border-color:var(--ink-faint)}
+.char-tab b{display:block;font-weight:600;font-size:.9rem;color:var(--ink);line-height:1.25}
+.char-tab span{font-size:.76rem;color:var(--ink-faint)}
+.char-tab.on{border-color:var(--teal);box-shadow:inset 0 0 0 1px var(--teal)}
+.char-meta{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:22px}
+.char-meta .mono{font-size:.74rem;color:var(--ink-faint);letter-spacing:.04em}
+.overlay-toggle{display:inline-flex;align-items:center;gap:8px;font-size:.86rem;color:var(--ink-soft);cursor:pointer;user-select:none}
+.overlay-toggle input{accent-color:var(--amber);width:15px;height:15px}
+.char-detail .radar-card{margin:14px 0 26px}
+.legend{display:flex;gap:18px;justify-content:center;font-size:.76rem;color:var(--ink-faint);padding:0 0 12px}
+.legend i{display:inline-block;width:18px;height:0;border-top:2px solid var(--teal);vertical-align:middle;margin-right:6px}
+.legend i.you{border-top:2px dashed var(--amber)}
+.char-detail .fracture{margin-top:22px}
+
 @media(max-width:560px){
   .wrap{padding:0 18px 90px}
+  .char-tabs{grid-template-columns:repeat(2,1fr)}
+  .atlas-card{padding:22px 20px}
   .topbar{margin:0 -18px;padding:12px 18px}
   .budget-badge{flex-direction:column;gap:6px}
   .pips{max-width:50%}
@@ -372,6 +412,10 @@ input[type=range]:active::-webkit-slider-thumb{transform:scale(1.12)}
     <p class="eyebrow">Diagnóstico</p>
     <div class="radar-card"><div id="radarHolder"></div></div>
     <div class="arche" id="arche"></div>
+    <button class="atlas-link no-print" onclick="openAtlas()">
+      <span class="t">Ver los otros ocho arquetipos<small>y los perfiles de los personajes de La gran apuesta</small></span>
+      <span class="arr">→</span>
+    </button>
     <div class="portrait" id="portrait"></div>
   </div>
   <div class="diag-section">
@@ -391,7 +435,29 @@ input[type=range]:active::-webkit-slider-thumb{transform:scale(1.12)}
   </div>
   <div class="actions no-print">
     <button class="btn btn-teal" onclick="window.print()">Descargar diagnóstico</button>
+    <button class="btn-ghost btn" onclick="openAtlas()">Otros arquetipos</button>
     <button class="btn-ghost btn" onclick="restart()">Empezar de nuevo</button>
+  </div>
+</section>
+
+<!-- 7 · ATLAS DE ARQUETIPOS -->
+<section class="screen" id="s-atlas">
+  <div class="diag-section">
+    <p class="eyebrow">Atlas de arquetipos</p>
+    <h2 style="margin-top:10px">Nueve maneras<br>de llegar al futuro.</h2>
+    <p class="lead" style="margin-top:16px">Tu arquetipo salió de dónde pusiste el peso: en leer, en imaginar, en decidir y actuar, o en la empatía que atraviesa a los otros tres. Hay ocho más, cada uno con su manera de llegar temprano y su manera de equivocarse. Ninguno sale gratis.</p>
+    <div class="chips" id="archeChips"></div>
+    <div id="archeDetail"></div>
+  </div>
+  <div class="diag-section" id="bigShort">
+    <p class="eyebrow">Perfiles de referencia · La gran apuesta</p>
+    <h2 style="margin-top:10px">Cuatro personajes vieron<br>venir la misma crisis.</h2>
+    <p class="lead" style="margin-top:16px">En <i>La gran apuesta</i> (Adam McKay, 2015) cuatro personajes detectan antes que casi nadie el derrumbe hipotecario de 2008. Miraron el mismo mercado desde lugares distintos, con presupuestos distintos, y cada uno pagó su apuesta en un eje diferente. Acertar no los volvió iguales.</p>
+    <div class="char-tabs" id="charTabs"></div>
+    <div class="char-detail" id="charDetail"></div>
+  </div>
+  <div class="actions">
+    <button class="btn" onclick="backToDiag()">Volver a mi diagnóstico</button>
   </div>
 </section>
 
@@ -549,6 +615,21 @@ const ARCHE = {
   baquiano:{n:'El Baquiano',d:'Conoce el terreno porque escuchó a quienes lo caminan. Su lectura del entorno viene de las voces que otros no consultan.',c:'Nadie llega a un lugar nuevo guiándose solo por lo que ya está trazado.'},
   equilibrista:{n:'El Equilibrista',d:'Ningún pico, ningún hueco. Sostiene el proceso completo de punta a punta sin quebrarse en ningún tramo.',c:'Un perfil sin firma reconocible rara vez es convocado para lo que nadie más puede hacer.'}
 };
+/* dónde pone el peso cada arquetipo (solo para el atlas) y glosa del baquiano */
+const ARCHE_W = {cartografo:'Leer',escenografo:'Imaginar',constructor:'Decidir y actuar',tejedor:'Empatía',
+  vigia:'Leer + actuar',pionero:'Imaginar + actuar',faro:'Imaginar + empatía',baquiano:'Leer + empatía',equilibrista:'Los cuatro tiempos parejos'};
+Object.keys(ARCHE).forEach(k=>{ARCHE[k].k=k; ARCHE[k].w=ARCHE_W[k];});
+ARCHE.baquiano.g='Baquiano: persona que conoce muy bien los caminos, las trochas, los atajos y los detalles de un terreno, y por eso sirve de guía.';
+const ARCHE_ORDER=['cartografo','escenografo','constructor','tejedor','vigia','pionero','faro','baquiano','equilibrista'];
+
+/* perfiles de referencia: La gran apuesta (Adam McKay, 2015).
+   Vennett y Rickert incluyen los 3 bonos de refuerzo que ganaron. */
+const CHARS = [
+ {n:'Michael Burry', a:'Christian Bale', v:[5,5,4,3,0,5,0,2]},
+ {n:'Mark Baum',     a:'Steve Carell',   v:[3,4,5,2,4,2,4,0]},
+ {n:'Jared Vennett', a:'Ryan Gosling',   v:[2,3,3,4,5,3,3,4], bonus:true},
+ {n:'Ben Rickert',   a:'Brad Pitt',      v:[4,3,3,5,2,3,5,2], bonus:true}
+];
 
 const SCEN = [
  {t:'La conversación que nadie abre',d:'Hay un tema que divide a tu comunidad y todos aprendieron a rodearlo. Alguien tiene que ponerlo en el centro sin que la mesa se rompa, y sostener lo que aparezca después.',r:[6,0,5]},
@@ -782,8 +863,9 @@ function bonusStep(i,d){
 function finishBonus(){ if(bonusPool>0) return; toDiag(); }
 
 /* ============ DIAGNÓSTICO ============ */
-function pickArche(){
-  const L=sum(T.leer)/15, I=sum(T.imaginar)/10, A=sum(T.actuar)/10, E=v[6]/5;
+function pickArche(vals=v){
+  const s=ix=>ix.reduce((t,i)=>t+vals[i],0);
+  const L=s(T.leer)/15, I=s(T.imaginar)/10, A=s(T.actuar)/10, E=vals[6]/5;
   const arr=[['L',L],['I',I],['A',A],['E',E]].sort((a,b)=>b[1]-a[1]);
   if(arr[0][1]-arr[3][1] < .15) return ARCHE.equilibrista;
   const [k1,s1]=arr[0], [k2,s2]=arr[1];
@@ -797,7 +879,7 @@ function pickArche(){
   return {L:ARCHE.cartografo,I:ARCHE.escenografo,A:ARCHE.constructor,E:ARCHE.tejedor}[k1];
 }
 
-function radarSVG(){
+function radarSVG(vals=v, ov=null, uid='me', label='Diagrama de radar del perfil de liderazgo de futuro'){
   const cx=280,cy=220,R=130,N=8;
   const ang=i=>(-90+i*45)*Math.PI/180;
   const pt=(i,r)=>[cx+Math.cos(ang(i))*r, cy+Math.sin(ang(i))*r];
@@ -810,33 +892,37 @@ function radarSVG(){
   }
   let spokes='';
   for(let i=0;i<N;i++){const [x,y]=pt(i,R);spokes+=`<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#0D2220" stroke-opacity=".09"/>`}
-  const shape=Array.from({length:N},(_,i)=>pt(i,R*v[i]/5).map(n=>n.toFixed(1)).join(',')).join(' ');
+  const shapeOf=a=>Array.from({length:N},(_,i)=>pt(i,R*a[i]/5).map(n=>n.toFixed(1)).join(',')).join(' ');
+  const shape=shapeOf(vals);
+  const ovPoly=ov?`<polygon points="${shapeOf(ov)}" fill="none" stroke="#D9922B" stroke-width="1.8" stroke-dasharray="5 4" stroke-linejoin="round"/>`:'';
   let dots='',labels='';
   for(let i=0;i<N;i++){
-    const [dx,dy]=pt(i,R*v[i]/5);
-    if(v[i]>0) dots+=`<circle cx="${dx.toFixed(1)}" cy="${dy.toFixed(1)}" r="3.4" fill="#12A99E" stroke="#F1F4F2" stroke-width="1.6"/>`;
+    const [dx,dy]=pt(i,R*vals[i]/5);
+    if(vals[i]>0) dots+=`<circle cx="${dx.toFixed(1)}" cy="${dy.toFixed(1)}" r="3.4" fill="#12A99E" stroke="#F1F4F2" stroke-width="1.6"/>`;
     const [lx,ly]=pt(i,R+34);
     const c=Math.cos(ang(i));
     const anc=Math.abs(c)<.2?'middle':(c>0?'start':'end');
     labels+=`<text x="${lx.toFixed(1)}" y="${(ly+4).toFixed(1)}" text-anchor="${anc}" font-family="Inter Tight, sans-serif" font-size="12" font-weight="500" fill="#0D2220">${AXES[i].short}</text>`;
-    labels+=`<text x="${lx.toFixed(1)}" y="${(ly+18).toFixed(1)}" text-anchor="${anc}" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#12A99E">${v[i]}</text>`;
+    labels+=`<text x="${lx.toFixed(1)}" y="${(ly+18).toFixed(1)}" text-anchor="${anc}" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#12A99E">${vals[i]}</text>`;
   }
-  return `<svg viewBox="0 0 560 470" role="img" aria-label="Diagrama de radar del perfil de liderazgo de futuro">
-    <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+  return `<svg viewBox="0 0 560 470" role="img" aria-label="${label}">
+    <defs><linearGradient id="g-${uid}" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#1ABCB0" stop-opacity=".30"/><stop offset="100%" stop-color="#D9922B" stop-opacity=".18"/>
     </linearGradient></defs>
     ${rings}${spokes}
-    <polygon points="${shape}" fill="url(#g)" stroke="#12A99E" stroke-width="2" stroke-linejoin="round"/>
-    ${dots}${labels}</svg>`;
+    <polygon points="${shape}" fill="url(#g-${uid})" stroke="#12A99E" stroke-width="2" stroke-linejoin="round"/>
+    ${ovPoly}${dots}${labels}</svg>`;
 }
 
 function toDiag(){
   document.getElementById('radarHolder').innerHTML=radarSVG();
 
   const A=pickArche();
+  myArche=A; atlasSel=A.k; charSel=0; overlay=false;
   document.getElementById('arche').innerHTML=
     `<p class="eyebrow">Tu arquetipo</p><h2>${A.n}</h2><p>${A.d}</p>
-     <div class="cost"><b>El costo de esta apuesta.</b> ${A.c}</div>`;
+     <div class="cost"><b>El costo de esta apuesta.</b> ${A.c}</div>
+     ${A.g?`<p class="gloss">${A.g}</p>`:''}`;
 
   document.getElementById('portrait').innerHTML=
     `<p>${AXES.map((a,i)=>a.lv[v[i]]).join(' ')}</p>`;
@@ -859,7 +945,7 @@ function toDiag(){
     `<div class="scen"><h3>${o.s.t}</h3><p>${o.s.d}</p>
      <div class="tags">${o.s.r.map(i=>`<i>${AXES[i].short} ${v[i]}</i>`).join('')}</div></div>`).join('');
 
-  let lo=0; for(let i=1;i<8;i++) if(v[i]<v[lo]) lo=i;
+  const lo=lowAxis(v);
   document.getElementById('fracture').innerHTML=
     `<div class="fracture">
       <p class="eyebrow">${AXES[lo].name} · ${v[lo]}/5</p>
@@ -871,8 +957,62 @@ function toDiag(){
   go('s-diag');
 }
 
+function lowAxis(vals){ let lo=0; for(let i=1;i<8;i++) if(vals[i]<vals[lo]) lo=i; return lo; }
+
+/* ============ ATLAS ============ */
+let myArche=null, atlasSel=null, charSel=0, overlay=false, diagScroll=0;
+
+function openAtlas(){ diagScroll=window.scrollY; go('s-atlas'); renderArche(); renderChars(); }
+function backToDiag(){ go('s-diag'); window.scrollTo({top:diagScroll,behavior:'instant'}); }
+
+function renderArche(){
+  document.getElementById('archeChips').innerHTML=ARCHE_ORDER.map(k=>
+    `<button class="chip ${k===atlasSel?'on':''}" aria-pressed="${k===atlasSel}" onclick="selArche('${k}')">${myArche&&k===myArche.k?'<span class="mine" title="Tu arquetipo"></span>':''}${ARCHE[k].n}</button>`).join('');
+  const A=ARCHE[atlasSel], mine=myArche&&A.k===myArche.k;
+  const who=CHARS.map((c,i)=>({c,i})).filter(o=>pickArche(o.c.v).k===A.k);
+  document.getElementById('archeDetail').innerHTML=
+    `<div class="atlas-card">
+      <p class="weight">Peso · ${A.w}${mine?' <em>· tu arquetipo</em>':''}</p>
+      <h3>${A.n}</h3><p>${A.d}</p>
+      <div class="cost"><b>El costo de esta apuesta.</b> ${A.c}</div>
+      ${A.g?`<p class="gloss">${A.g}</p>`:''}
+      ${who.length?`<div class="who">En La gran apuesta: ${who.map(o=>`<button onclick="selChar(${o.i},true)">${o.c.n}</button>`).join('')}</div>`:''}
+    </div>`;
+}
+function selArche(k){ atlasSel=k; renderArche(); }
+
+function renderChars(){
+  document.getElementById('charTabs').innerHTML=CHARS.map((c,i)=>
+    `<button class="char-tab ${i===charSel?'on':''}" aria-pressed="${i===charSel}" onclick="selChar(${i})"><b>${c.n}</b><span>${c.a}</span></button>`).join('');
+  const c=CHARS[charSel], A=pickArche(c.v), lo=lowAxis(c.v);
+  const total=c.v.reduce((a,b)=>a+b,0);
+  document.getElementById('charDetail').innerHTML=
+    `<div class="char-meta">
+      <span class="mono">${total} bonos${c.bonus?' · 24 + los 3 de refuerzo que ganó':''}</span>
+      <label class="overlay-toggle"><input type="checkbox" ${overlay?'checked':''} onchange="setOverlay(this.checked)">Superponer mi radar</label>
+    </div>
+    <div class="radar-card">${radarSVG(c.v, overlay?v:null, 'c'+charSel, 'Radar de '+c.n)}
+      ${overlay?`<div class="legend"><span><i></i>${c.n}</span><span><i class="you"></i>Tu radar</span></div>`:''}</div>
+    <div class="arche">
+      <p class="eyebrow">Arquetipo de ${c.n}</p><h2>${A.n}</h2><p>${A.d}</p>
+      <div class="cost"><b>El costo de esta apuesta.</b> ${A.c}</div>
+      ${A.g?`<p class="gloss">${A.g}</p>`:''}
+    </div>
+    <div class="fracture">
+      <p class="eyebrow">Punto de fractura · ${AXES[lo].name} · ${c.v[lo]}/5</p>
+      <h3 class="fr-title">${FRACT[lo].t}</h3>
+      <p>${AXES[lo].fr}</p>
+    </div>`;
+}
+function selChar(i,scroll){
+  charSel=i; renderChars();
+  if(scroll) document.getElementById('bigShort').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function setOverlay(on){ overlay=on; renderChars(); }
+
 function restart(){
   v=[0,0,0,0,0,0,0,0]; cur=0; pass=1; bonusPool=0; bonusAdd=[0,0,0,0,0,0,0,0];
+  myArche=null; atlasSel=null; charSel=0; overlay=false;
   go('s-welcome');
 }
 </script>
