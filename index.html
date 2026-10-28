@@ -258,8 +258,51 @@ input[type=range]:active::-webkit-slider-thumb{transform:scale(1.12)}
 .legend i.you{border-top:2px dashed var(--amber)}
 .char-detail .fracture{margin-top:22px}
 
+/* barra de navegación del diagnóstico y del atlas: arriba en reposo, cápsula flotante al bajar */
+.nav-sentinel{display:block;height:1px;margin-bottom:-1px}
+.dnav{position:sticky;top:12px;z-index:15;margin:0 0 30px}
+.dnav-in{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 0;border:1px solid transparent;border-radius:999px;
+  transition:background .28s,box-shadow .28s,padding .28s,border-color .28s}
+.dnav.stuck .dnav-in{background:rgba(241,244,242,.86);backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px) saturate(1.2);
+  border-color:var(--line);box-shadow:0 1px 2px rgba(13,34,32,.05),0 14px 34px rgba(13,34,32,.13);padding:6px 6px 6px 20px}
+.dnav.atlas.stuck .dnav-in{padding:6px}
+.dnav-id{min-width:0;display:flex;align-items:baseline;gap:10px}
+.dnav-id .k{font-family:'JetBrains Mono',monospace;font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);flex:none}
+.dnav-id .v{font-family:'Fraunces',Georgia,serif;font-size:1.08rem;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dnav-act{display:flex;align-items:center;gap:6px;flex:none}
+.nbtn{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 15px;border-radius:999px;border:1px solid var(--line);background:var(--paper);
+  font-size:.86rem;font-weight:500;color:var(--ink-soft);white-space:nowrap;transition:background .18s,color .18s,border-color .18s}
+.nbtn:hover{color:var(--ink);border-color:var(--ink-faint);background:#fff}
+.nbtn svg{flex:none}
+.nbtn.primary{background:var(--teal);border-color:var(--teal);color:var(--paper)}
+.nbtn.primary:hover{background:var(--teal-light);border-color:var(--teal-light);color:var(--paper)}
+.nbtn.icon-sm .lbl{display:none}
+.nbtn.icon-sm{padding:0;width:38px;justify-content:center}
+.nbtn.icon-sm.confirm{width:auto;padding:0 15px}
+.nbtn.icon-sm.confirm .lbl{display:inline}
+.dnav-act:has(.confirm) .nbtn.collapse span{display:none}
+.dnav-act:has(.confirm) .nbtn.collapse{padding:0;width:38px;justify-content:center}
+.nbtn.confirm,.nbtn.confirm:hover{border-color:rgba(192,86,60,.5);color:var(--red);background:rgba(192,86,60,.07)}
+.seg{display:flex;gap:2px;background:var(--paper-deep);border-radius:999px;padding:3px;flex:none}
+.seg button{height:32px;padding:0 14px;border-radius:999px;font-size:.82rem;font-weight:500;color:var(--ink-soft);white-space:nowrap;transition:background .18s,color .18s,box-shadow .18s}
+.seg button:hover{color:var(--ink)}
+.seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(13,34,32,.13)}
+.m-only{display:none}
+#s-atlas .diag-section{scroll-margin-top:84px}
+
 @media(max-width:560px){
   .wrap{padding:0 18px 90px}
+  .d-only{display:none}
+  .m-only{display:inline}
+  .dnav-id .k{display:none}
+  .dnav.stuck .dnav-in{padding:5px 5px 5px 16px}
+  .dnav.atlas.stuck .dnav-in{padding:5px}
+  .nbtn{padding:0 13px;gap:7px}
+  .nbtn.icon-sm.confirm{padding:0 13px}
+  #diagNav .dnav-id{display:none}
+  #diagNav .dnav-act{flex:1}
+  #diagNav .dnav-act .nbtn.primary{margin-left:auto}
+  .seg button{padding:0 12px}
   .char-tabs{grid-template-columns:repeat(2,1fr)}
   .atlas-card{padding:22px 20px}
   .topbar{margin:0 -18px;padding:12px 18px}
@@ -404,10 +447,30 @@ input[type=range]:active::-webkit-slider-thumb{transform:scale(1.12)}
 
 <!-- 6 · DIAGNÓSTICO -->
 <section class="screen" id="s-diag">
-  <div class="print-head">
+  <header class="print-head">
     <span>Radar de Futuro</span>
     <span>Perfil de liderazgo de futuro · 8 ejes · 24 bonos</span>
-  </div>
+  </header>
+  <i class="nav-sentinel no-print" aria-hidden="true"></i>
+  <nav class="dnav no-print" id="diagNav" aria-label="Acciones del diagnóstico">
+    <div class="dnav-in">
+      <div class="dnav-id"><span class="k">Tu perfil</span><span class="v" id="navArche"></span></div>
+      <div class="dnav-act">
+        <button class="nbtn collapse" onclick="openAtlas()" aria-label="Ver los otros arquetipos">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="3.5" cy="3.5" r="1.25"/><circle cx="8" cy="3.5" r="1.25"/><circle cx="12.5" cy="3.5" r="1.25"/><circle cx="3.5" cy="8" r="1.25"/><circle cx="8" cy="8" r="1.25"/><circle cx="12.5" cy="8" r="1.25"/><circle cx="3.5" cy="12.5" r="1.25"/><circle cx="8" cy="12.5" r="1.25"/><circle cx="12.5" cy="12.5" r="1.25"/></svg>
+          <span><span class="d-only">Otros arquetipos</span><span class="m-only">Arquetipos</span></span>
+        </button>
+        <button class="nbtn icon-sm" id="restartBtn" onclick="askRestart()" aria-label="Empezar de nuevo" title="Empezar de nuevo">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.1 8.4a4.9 4.9 0 1 0 1.6-4.1"/><path d="M3.2 2.6v2.9h2.9"/></svg>
+          <span class="lbl">Empezar de nuevo</span>
+        </button>
+        <button class="nbtn primary" onclick="window.print()" aria-label="Descargar diagnóstico en PDF">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2.4v7.4M4.9 6.9 8 10l3.1-3.1M3 13.2h10"/></svg>
+          <span><span class="d-only">Descargar </span>PDF</span>
+        </button>
+      </div>
+    </div>
+  </nav>
   <div class="diag-section">
     <p class="eyebrow">Diagnóstico</p>
     <div class="radar-card"><div id="radarHolder"></div></div>
@@ -433,16 +496,24 @@ input[type=range]:active::-webkit-slider-thumb{transform:scale(1.12)}
     <h2 style="margin-top:10px">Y un escenario futuro<br>desafiante.</h2>
     <div id="fracture" style="margin-top:20px"></div>
   </div>
-  <div class="actions no-print">
-    <button class="btn btn-teal" onclick="window.print()">Descargar diagnóstico</button>
-    <button class="btn-ghost btn" onclick="openAtlas()">Otros arquetipos</button>
-    <button class="btn-ghost btn" onclick="restart()">Empezar de nuevo</button>
-  </div>
 </section>
 
 <!-- 7 · ATLAS DE ARQUETIPOS -->
 <section class="screen" id="s-atlas">
-  <div class="diag-section">
+  <i class="nav-sentinel" aria-hidden="true"></i>
+  <nav class="dnav atlas no-print" id="atlasNav" aria-label="Navegación del atlas">
+    <div class="dnav-in">
+      <button class="nbtn" onclick="backToDiag()">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.6 8H3.6M7.2 4.4 3.6 8l3.6 3.6"/></svg>
+        <span><span class="d-only">Volver a mi diagnóstico</span><span class="m-only">Mi diagnóstico</span></span>
+      </button>
+      <div class="seg" aria-label="Secciones del atlas">
+        <button id="segArche" class="on" aria-current="true" onclick="jumpAtlas('arche')">Arquetipos</button>
+        <button id="segFilm" onclick="jumpAtlas('film')"><span class="d-only">La gran apuesta</span><span class="m-only">Película</span></button>
+      </div>
+    </div>
+  </nav>
+  <div class="diag-section" id="atlasTop">
     <p class="eyebrow">Atlas de arquetipos</p>
     <h2 style="margin-top:10px">Nueve maneras<br>de llegar al futuro.</h2>
     <p class="lead" style="margin-top:16px">Tu arquetipo salió de dónde pusiste el peso: en leer, en imaginar, en decidir y actuar, o en la empatía que atraviesa a los otros tres. Hay ocho más, cada uno con su manera de llegar temprano y su manera de equivocarse. Ninguno sale gratis.</p>
@@ -455,9 +526,6 @@ input[type=range]:active::-webkit-slider-thumb{transform:scale(1.12)}
     <p class="lead" style="margin-top:16px">En <i>La gran apuesta</i> (Adam McKay, 2015) cuatro personajes detectan antes que casi nadie el derrumbe hipotecario de 2008. Miraron el mismo mercado desde lugares distintos, con presupuestos distintos, y cada uno pagó su apuesta en un eje diferente. Acertar no los volvió iguales.</p>
     <div class="char-tabs" id="charTabs"></div>
     <div class="char-detail" id="charDetail"></div>
-  </div>
-  <div class="actions">
-    <button class="btn" onclick="backToDiag()">Volver a mi diagnóstico</button>
   </div>
 </section>
 
@@ -668,6 +736,7 @@ function go(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
   document.getElementById(id).classList.add('on');
   window.scrollTo({top:0,behavior:'instant'});
+  if(typeof updateNav==='function') updateNav();
 }
 function toggleModal(on){document.getElementById('modal').classList.toggle('on',on)}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')toggleModal(false)});
@@ -919,6 +988,8 @@ function toDiag(){
 
   const A=pickArche();
   myArche=A; atlasSel=A.k; charSel=0; overlay=false;
+  document.getElementById('navArche').textContent=A.n;
+  resetRestartBtn();
   document.getElementById('arche').innerHTML=
     `<p class="eyebrow">Tu arquetipo</p><h2>${A.n}</h2><p>${A.d}</p>
      <div class="cost"><b>El costo de esta apuesta.</b> ${A.c}</div>
@@ -962,8 +1033,8 @@ function lowAxis(vals){ let lo=0; for(let i=1;i<8;i++) if(vals[i]<vals[lo]) lo=i
 /* ============ ATLAS ============ */
 let myArche=null, atlasSel=null, charSel=0, overlay=false, diagScroll=0;
 
-function openAtlas(){ diagScroll=window.scrollY; go('s-atlas'); renderArche(); renderChars(); }
-function backToDiag(){ go('s-diag'); window.scrollTo({top:diagScroll,behavior:'instant'}); }
+function openAtlas(){ diagScroll=window.scrollY; go('s-atlas'); renderArche(); renderChars(); updateSeg(); }
+function backToDiag(){ go('s-diag'); window.scrollTo({top:diagScroll,behavior:'instant'}); updateNav(); }
 
 function renderArche(){
   document.getElementById('archeChips').innerHTML=ARCHE_ORDER.map(k=>
@@ -1009,6 +1080,45 @@ function selChar(i,scroll){
   if(scroll) document.getElementById('bigShort').scrollIntoView({behavior:'smooth',block:'start'});
 }
 function setOverlay(on){ overlay=on; renderChars(); }
+
+/* barras flotantes: se vuelven cápsula cuando su marcador pasa por debajo del borde superior */
+function updateNav(){
+  document.querySelectorAll('.screen.on .nav-sentinel').forEach(sn=>{
+    sn.nextElementSibling.classList.toggle('stuck', sn.getBoundingClientRect().top < 12);
+  });
+  updateSeg();
+}
+function jumpAtlas(t){
+  if(t==='film') document.getElementById('bigShort').scrollIntoView({behavior:'smooth',block:'start'});
+  else window.scrollTo({top:0,behavior:'smooth'});
+}
+function updateSeg(){
+  if(!document.getElementById('s-atlas').classList.contains('on')) return;
+  const film=document.getElementById('bigShort').getBoundingClientRect().top < window.innerHeight*0.45;
+  const a=document.getElementById('segArche'), f=document.getElementById('segFilm');
+  a.classList.toggle('on',!film); f.classList.toggle('on',film);
+  a.toggleAttribute('aria-current',!film); f.toggleAttribute('aria-current',film);
+}
+let navRaf=0;
+window.addEventListener('scroll',()=>{ if(!navRaf) navRaf=requestAnimationFrame(()=>{navRaf=0; updateNav();}); },{passive:true});
+
+/* empezar de nuevo pide un segundo toque: borra el perfil */
+let rsTimer=null;
+function askRestart(){
+  const b=document.getElementById('restartBtn');
+  if(b.classList.contains('confirm')){ resetRestartBtn(); restart(); return; }
+  b.classList.add('confirm');
+  b.querySelector('.lbl').textContent='¿Borrar y empezar?';
+  b.setAttribute('aria-label','Toca otra vez para borrar este perfil y empezar de nuevo');
+  rsTimer=setTimeout(resetRestartBtn,3500);
+}
+function resetRestartBtn(){
+  clearTimeout(rsTimer);
+  const b=document.getElementById('restartBtn'); if(!b) return;
+  b.classList.remove('confirm');
+  b.querySelector('.lbl').textContent='Empezar de nuevo';
+  b.setAttribute('aria-label','Empezar de nuevo');
+}
 
 function restart(){
   v=[0,0,0,0,0,0,0,0]; cur=0; pass=1; bonusPool=0; bonusAdd=[0,0,0,0,0,0,0,0];
